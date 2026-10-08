@@ -1,68 +1,75 @@
 # item-service
 
-> **Work in progress.** So far there are the models, the domain interfaces and the item-status repository. The gRPC API, the services, validation, `main.go` and the Tilt setup still need to be built. Until then, the web app's items page (Home) uses mock data from [web/src/api/items.ts](../../web/src/api/items.ts).
+> **Status: in progress.** The data model, the domain interfaces and the item-status repository are built. The gRPC API, the services and the deployment are next. Until then, the web app's items page runs on mock data.
 
-Will own the **inventory**: the items, the categories they belong to, and the statuses they can be in (for example *In stock* or *Lent out*). It's built the same way as the [user-service](../user-service/Readme.md), so that's the reference for every missing part.
+Will own the **inventory**:
+- **items**, with their categories and statuses
+- **locations:** where things are, from building down to a single spot
+- **assignments:** which items each person has, with the full history
 
-![Building blocks](docs/overview.svg)
+| | |
+|---|---|
+| **API** | gRPC on `:50053` (planned), `proto/item/item.proto` |
+| **Database** | MySQL `item_service` |
+| **Consumes** | `user.events`: `UserDeleted` (planned) |
 
-Solid boxes exist; dashed ones are still to build. The diagrams are pages of [docs/item-service.drawio](docs/item-service.drawio).
+![Overview](docs/overview.svg)
 
-## Entry points (planned)
+## Roadmap
 
-| Entry point | Will take | Built like |
+![Roadmap sketch](docs/roadmap.svg)
+
+The plan for tying items to people and places. Solid boxes exist today; dashed ones are planned and may still change.
+
+- **Locations form a tree:** building → floor → room → spot. A location can carry a GeoJSON shape, which feeds the floor plan in the web app.
+- **An item has one current location and one current holder.** Every change adds an `Assignment` row, so the history of who had what, and where, is kept.
+- **Users stay in the user-service.** The item-service stores only their id; the gateway fills in names when a query asks for them. When a user is deleted (`UserDeleted`), their open assignments are closed.
+
+### Assigning an item (planned)
+
+![Assign an item](docs/assign-item.svg)
+
+1. The gateway checks the permission (`items:write`) and that the user exists.
+2. The item-service closes the current assignment and opens the new one, in one transaction.
+
+### Milestones
+
+| | Milestone | Status |
 |---|---|---|
-| gRPC server, `:50053` | `ItemService` calls from the gateway | [user-service internal/grpc](../user-service/internal/grpc) |
-| `cmd/main.go` | tracing, database (`item_service`), gRPC server | [user-service cmd/main.go](../user-service/cmd/main.go) |
+| 1 | Data model: items, categories, statuses | Done |
+| 2 | Repositories with paging, sorting and filtering | Item statuses done; items and categories next |
+| 3 | Services, validation, gRPC API, `cmd/main.go` | Planned |
+| 4 | Deployment in Tilt, gateway schema, web app on the real API | Planned |
+| 5 | Locations, synced with the floor plan | Planned |
+| 6 | Assignments and history; `UserDeleted` handling | Planned |
 
-The gRPC contract will be `proto/item/item.proto`, with the same paging convention as `ListUsers`. Kafka is only needed once another service has to react to item changes. Then the outbox from `shared/kafka` works here unchanged.
-
-## Data model
+## Data model today
 
 ![Data model](docs/data-model.svg)
 
-The models are in [internal/models](internal/models):
-- `gorm` tags define the tables, indexes and foreign keys.
-- `mod` tags clean the input up.
-- `validate` tags check it.
-- `json` tags name the fields in error messages.
+- **Every item has a category and a status.** Both use `ON DELETE RESTRICT`, so a category or status that items still use can't be deleted.
+- **Names are unique and ignore case:** *Tools* and *tools* count as the same category.
+- **Validation is built into the models** ([internal/models](internal/models)): `mod` tags clean input up, `validate` tags check it, and `json` tags name the fields in error messages.
 
-The `Category` and `Status` fields on `Item` carry `validate:"-"`. Creating an item then only needs `categoryId` and `statusId`, not the whole category.
-
-Category and status names are unique and compared without case, so *Tools* and *tools* count as the same name. Like the users' emails, the unique index includes soft-deleted rows.
-
-## Workflow: one page of item statuses
+## Listing
 
 ![List item statuses](docs/list-item-statuses.svg)
 
-[ItemStatusRepository.FindAll](internal/repository/item_status_repository.go) uses [shared/paging](../../shared/paging/paging.go):
-- `paging.OrderBy` turns the sort field into a column, using an allow-list, with `id` as the last sort key.
-- `paging.Find` loads the page and the total in one query.
-- `paging.Contains` builds the `LIKE` pattern.
+Listing uses [shared/paging](../../shared/paging/paging.go), like the user-service:
+- `OrderBy` maps sort fields to columns through an allow-list.
+- `Find` loads a page and its total in one query.
+- `Contains` builds case-insensitive substring filters.
 
-Items and categories will use the same three helpers. Only the sortable columns and the filter function differ per entity.
+Items, categories and locations will follow [ItemStatusRepository](internal/repository/item_status_repository.go).
 
-## To do
-
-1. `internal/validation`: copy it from the user-service.
-2. Repositories for items and categories. Change `ItemRepository.FindAll` to return `*types.Page[*models.Item]`, the type `paging.Find` gives.
-3. Services in `service/`, implementing the interfaces in [internal/domain](internal/domain). Their `FindAll` methods still take only a filter; give them the list params, like the repositories have.
-4. `proto/item/item.proto`, the gRPC handler and `cmd/main.go`.
-5. A Dockerfile, a k8s deployment and a Tilt resource, then [add it to the gateway](../graphql-gateway/Readme.md#adding-a-service).
-6. Point the web app's `api/items.ts` at the real API. Its function signatures already match.
-
-## Layout
+## Project structure
 
 ```
 internal/
-  domain/              interfaces for the services and repositories, errors
-  models/              Item, Category, ItemStatus (GORM + mod/validate tags)
-  repository/          ItemStatusRepository (done)
-  grpc/, events/, validation/   empty for now
+  domain/              service and repository interfaces, errors
+  models/              Item, Category, ItemStatus (GORM + validation tags)
+  repository/          ItemStatusRepository
+  grpc/, events/, validation/   planned
 pkg/types/             list params, filters, sort fields, input
-docs/                  item-service.drawio + one SVG per page
+docs/                  item-service.drawio and its SVGs
 ```
-
-## Editing the diagrams
-
-Open [docs/item-service.drawio](docs/item-service.drawio) in [draw.io](https://app.diagrams.net) or the VS Code extension *Draw.io Integration*. After a change, export each page as SVG over the matching file in `docs/`: *File → Export as → SVG*, with *Include a copy of my diagram* on.
