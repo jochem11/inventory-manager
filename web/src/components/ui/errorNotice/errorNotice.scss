@@ -1,0 +1,18 @@
+.error-notice {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--error);
+  border-radius: var(--radius-md);
+  background: var(--error-soft);
+  color: var(--error-text);
+  font-size: var(--text-sm);
+
+  button {
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-weight: var(--font-semibold);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}

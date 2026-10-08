@@ -1,0 +1,10 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+// Buttons placed directly in a form keep their natural width unless `block`.
+.form > .button:not(.button--block) {
+  align-self: flex-start;
+}

@@ -1,0 +1,9 @@
+go 1.26.2
+
+use (
+	./services/auth-service
+	./services/graphql-gateway
+	./services/item-service
+	./services/user-service
+	./shared
+)

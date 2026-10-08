@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  ENVIRONMENT: "development"
+  WEB_HOST: "0.0.0.0"
+  WEB_PORT: "3000"
+  # Where the services send traces (OTLP/gRPC). Leave unset to turn tracing off.
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+  # Kafka brokers for the services in the cluster.
+  KAFKA_BROKERS: "kafka:9092"

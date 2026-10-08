@@ -1,0 +1,13 @@
+# Local settings and credentials: commit .env.example, never .env.
+.env
+.env.*
+!.env.example
+
+# Go binaries compiled by Tilt (see the Tiltfile).
+build/
+
+# Dependencies, logs, OS and editor files.
+node_modules/
+*.log
+.DS_Store
+.idea/

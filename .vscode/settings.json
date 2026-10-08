@@ -1,0 +1,4 @@
+{
+  // Resolve proto imports (e.g. "common/paging.proto") from proto/, like protoc -I proto.
+  "protobuf.includes": ["${workspaceFolder}/proto"]
+}

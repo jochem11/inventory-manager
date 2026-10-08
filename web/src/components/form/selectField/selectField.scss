@@ -1,0 +1,24 @@
+.field {
+  &__input--select {
+    appearance: none;
+    padding-right: var(--space-6);
+    cursor: pointer;
+  }
+
+  // Custom chevron for the native select.
+  &__control--select::after {
+    content: "";
+    position: absolute;
+    right: var(--field-pad-x);
+    width: 0.45em;
+    height: 0.45em;
+    border-right: 2px solid var(--text-muted);
+    border-bottom: 2px solid var(--text-muted);
+    transform: translateY(-25%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  &--underlined &__control--select::after {
+    right: 0;
+  }
+}

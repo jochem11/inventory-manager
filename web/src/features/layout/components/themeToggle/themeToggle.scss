@@ -1,0 +1,18 @@
+.theme-toggle {
+  font-size: var(--text-lg);
+
+  // Show the mode you'd switch *to*: moon in light, sun in dark.
+  &__sun {
+    display: none;
+  }
+
+  :root[data-theme="dark"] & {
+    .theme-toggle__moon {
+      display: none;
+    }
+
+    .theme-toggle__sun {
+      display: block;
+    }
+  }
+}

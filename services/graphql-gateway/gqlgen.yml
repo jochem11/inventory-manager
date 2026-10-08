@@ -1,0 +1,36 @@
+# gqlgen config: `make graphql` reads schema/ and regenerates the code below.
+
+schema:
+  - schema/*.graphqls
+
+# Executable schema: generated, never edit. One <schema file>.generated.go per
+# schema file, plus root_ (wiring) and prelude (introspection built-ins).
+exec:
+  package: generated
+  layout: follow-schema
+  dir: internal/graph/generated
+
+# Go types for the schema's types, inputs and enums: generated, never edit.
+model:
+  package: model
+  filename: internal/graph/model/models_gen.go
+
+# Resolvers: one <schema file>.resolvers.go per schema file. gqlgen adds stubs
+# for new fields and keeps the bodies you've written.
+resolver:
+  package: graph
+  layout: follow-schema
+  dir: internal/graph
+  filename_template: "{name}.resolvers.go"
+
+# Use int for Int, not int64.
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+  AuthPayload:
+    model:
+      - github.com/jochem11/inventory-manager/services/graphql-gateway/internal/graph/model.AuthPayload

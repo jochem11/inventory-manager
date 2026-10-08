@@ -1,0 +1,119 @@
+.auth-layout {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--content-bg);
+  color: var(--text);
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-6);
+  }
+
+  &__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-md);
+    text-decoration: none;
+
+    svg {
+      color: var(--primary);
+    }
+  }
+
+  &__main {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: var(--space-8) var(--space-4) var(--space-16);
+
+    @media (height > 44rem) {
+      align-items: center;
+    }
+  }
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 26rem;
+  padding: var(--space-8);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+
+  @media (width < 30rem) {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+  }
+
+  &__description {
+    margin: var(--space-2) 0 var(--space-6);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  &__footer {
+    margin: var(--space-6) 0 0;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+
+  a {
+    color: var(--primary-text);
+    font-weight: var(--font-medium);
+  }
+}
+
+.auth-notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+
+  > * {
+    margin: 0;
+  }
+
+  > * + * {
+    margin-top: var(--space-2);
+  }
+
+  &--error {
+    background: var(--error-soft);
+    color: var(--error-text);
+  }
+
+  &--success {
+    background: var(--success-soft);
+    color: var(--success-text);
+  }
+
+  &--info {
+    background: var(--info-soft);
+    color: var(--text);
+  }
+}
+
+.auth-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+
+  @media (width < 30rem) {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package common;
+
+// Direction of a list's sort order. Unspecified sorts ascending.
+enum SortDirection {
+  SORT_DIRECTION_UNSPECIFIED = 0;
+  SORT_DIRECTION_ASC = 1;
+  SORT_DIRECTION_DESC = 2;
+}

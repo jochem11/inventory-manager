@@ -1,0 +1,145 @@
+// Shared by every field: label, control box, hint/error, variants and sizes.
+.field {
+  // Per-field knobs the variants and sizes below override.
+  --field-accent: var(--focus-ring);
+  --field-height: 2.5rem;
+  --field-pad-x: var(--space-3);
+  --field-font: var(--text-base);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+
+  &--sm {
+    --field-height: 2rem;
+    --field-pad-x: var(--space-2);
+    --field-font: var(--text-sm);
+  }
+
+  &--lg {
+    --field-height: 3rem;
+    --field-pad-x: var(--space-4);
+    --field-font: var(--text-md);
+  }
+
+  &--invalid {
+    --field-accent: var(--error);
+  }
+
+  &__label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+  }
+
+  &__hint {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    line-height: 1.4;
+  }
+
+  &--invalid &__hint {
+    color: var(--error-text);
+  }
+
+  // The visible "box": holds the input plus any prefix/suffix adornments.
+  &__control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--field-height);
+    padding: 0 var(--field-pad-x);
+    color: var(--text);
+    font-size: var(--field-font);
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    min-height: var(--field-height);
+    border: none;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+
+    &::placeholder {
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+  }
+
+  &__adornment {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: 0.9em;
+  }
+
+  &--invalid &__control {
+    border-color: var(--error);
+  }
+
+  &--disabled {
+    opacity: 0.55;
+
+    * {
+      cursor: not-allowed;
+    }
+  }
+
+  // --- Variant: outlined (default) — bordered box on the surface. ----------
+  &--outlined &__control {
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+
+    &:hover {
+      border-color: var(--text-muted);
+    }
+
+    &:focus-within {
+      border-color: var(--field-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--field-accent) 20%, transparent);
+    }
+  }
+
+  // --- Variant: filled — soft tinted box, underline accent on focus. -------
+  &--filled &__control {
+    border: 1px solid transparent;
+    border-bottom: 2px solid var(--border-strong);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: var(--field-bg);
+
+    &:hover {
+      background: var(--surface-3);
+    }
+
+    &:focus-within {
+      border-bottom-color: var(--field-accent);
+      background: var(--surface-2);
+    }
+  }
+
+  // --- Variant: underlined — minimal, just a bottom rule. ------------------
+  &--underlined &__control {
+    padding-inline: 0;
+    border-bottom: 1px solid var(--border-strong);
+    background: transparent;
+
+    &:hover {
+      border-bottom-color: var(--text-muted);
+    }
+
+    &:focus-within {
+      border-bottom-color: var(--field-accent);
+      box-shadow: 0 1px 0 var(--field-accent);
+    }
+  }
+}

@@ -1,0 +1,449 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "corridor-main",
+      "properties": {
+        "name": "Main corridor",
+        "kind": "area"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0, 8], [40, 8], [40, 10], [0, 10], [0, 8]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "corridor-central",
+      "properties": {
+        "name": "Central corridor",
+        "kind": "area"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[18, 10], [20, 10], [20, 24], [18, 24], [18, 10]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "corridor-offices",
+      "properties": {
+        "name": "Office corridor",
+        "kind": "area"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[20, 15], [40, 15], [40, 17], [20, 17], [20, 15]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "stairs",
+      "properties": {
+        "name": "Stairs & lift",
+        "kind": "area"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[31, 0], [34, 0], [34, 8], [31, 8], [31, 0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "reception",
+      "properties": {
+        "name": "Reception",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0, 0], [8, 0], [8, 8], [0, 8], [0, 0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "meeting-amsterdam",
+      "properties": {
+        "name": "Amsterdam",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[8, 0], [14, 0], [14, 8], [8, 8], [8, 0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "meeting-rotterdam",
+      "properties": {
+        "name": "Rotterdam",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[14, 0], [20, 0], [20, 8], [14, 8], [14, 0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "kitchen",
+      "properties": {
+        "name": "Kitchen",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[20, 0], [28, 0], [28, 8], [20, 8], [20, 0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "wc-m",
+      "properties": {
+        "name": "WC (M)",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[28, 0], [31, 0], [31, 4], [28, 4], [28, 0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "wc-f",
+      "properties": {
+        "name": "WC (F)",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[28, 4], [31, 4], [31, 8], [28, 8], [28, 4]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "server-room",
+      "properties": {
+        "name": "Server room",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[34, 0], [37, 0], [37, 8], [34, 8], [34, 0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "storage-room",
+      "properties": {
+        "name": "Storage",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[37, 0], [40, 0], [40, 8], [37, 8], [37, 0]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "open-workspace",
+      "properties": {
+        "name": "Open workspace",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0, 10], [18, 10], [18, 24], [6, 24], [6, 18], [0, 18], [0, 10]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lounge",
+      "properties": {
+        "name": "Lounge",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0, 18], [6, 18], [6, 24], [0, 24], [0, 18]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "boardroom",
+      "properties": {
+        "name": "Boardroom",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[20, 10], [30, 10], [30, 15], [20, 15], [20, 10]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "focus-room",
+      "properties": {
+        "name": "Focus room",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[30, 10], [33, 10], [33, 15], [30, 15], [30, 10]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "booth-1",
+      "properties": {
+        "name": "Booth 1",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[33, 10], [35, 10], [35, 12.5], [33, 12.5], [33, 10]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "booth-2",
+      "properties": {
+        "name": "Booth 2",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[33, 12.5], [35, 12.5], [35, 15.0], [33, 15.0], [33, 12.5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "print-copy",
+      "properties": {
+        "name": "Print & copy",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[35, 10], [40, 10], [40, 15], [35, 15], [35, 10]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "office-1",
+      "properties": {
+        "name": "Office 1",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[20, 17], [25, 17], [25, 24], [20, 24], [20, 17]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "office-2",
+      "properties": {
+        "name": "Office 2",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[25, 17], [30, 17], [30, 24], [25, 24], [25, 17]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "office-3",
+      "properties": {
+        "name": "Office 3",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[30, 17], [35, 17], [35, 24], [30, 24], [30, 17]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "office-director",
+      "properties": {
+        "name": "Director",
+        "kind": "room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[35, 17], [40, 17], [40, 24], [35, 24], [35, 17]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "reception-mail",
+      "properties": {
+        "name": "Mail & coat shelf",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0.3, 0.3], [3.3, 0.3], [3.3, 0.9], [0.3, 0.9], [0.3, 0.3]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "reception-brochures",
+      "properties": {
+        "name": "Brochure rack",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[7.2, 1], [7.8, 1], [7.8, 5], [7.2, 5], [7.2, 1]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "amsterdam-av",
+      "properties": {
+        "name": "AV cabinet",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[8.3, 7.2], [10.8, 7.2], [10.8, 7.7], [8.3, 7.7], [8.3, 7.2]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "kitchen-pantry",
+      "properties": {
+        "name": "Pantry cupboard",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[20.3, 7.2], [27.7, 7.2], [27.7, 7.7], [20.3, 7.7], [20.3, 7.2]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "kitchen-fridge",
+      "properties": {
+        "name": "Fridge",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[20.3, 0.3], [21.3, 0.3], [21.3, 1.3], [20.3, 1.3], [20.3, 0.3]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "server-rack",
+      "properties": {
+        "name": "Server rack",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[34.4, 2], [35.6, 2], [35.6, 6], [34.4, 6], [34.4, 2]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "storage-rack-a",
+      "properties": {
+        "name": "Rack A",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[37.3, 0.5], [37.9, 0.5], [37.9, 7.5], [37.3, 7.5], [37.3, 0.5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "storage-rack-b",
+      "properties": {
+        "name": "Rack B",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[39.1, 0.5], [39.7, 0.5], [39.7, 7.5], [39.1, 7.5], [39.1, 0.5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "workspace-filing",
+      "properties": {
+        "name": "Filing cabinets",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[17.2, 11], [17.8, 11], [17.8, 16], [17.2, 16], [17.2, 11]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "workspace-supplies",
+      "properties": {
+        "name": "Supply shelf",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[10, 23.2], [14, 23.2], [14, 23.8], [10, 23.8], [10, 23.2]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lounge-books",
+      "properties": {
+        "name": "Bookshelf",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0.3, 23.2], [5.7, 23.2], [5.7, 23.7], [0.3, 23.7], [0.3, 23.2]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "boardroom-av",
+      "properties": {
+        "name": "AV cabinet",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[20.3, 11], [20.8, 11], [20.8, 14], [20.3, 14], [20.3, 11]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "print-paper",
+      "properties": {
+        "name": "Paper storage",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[39.2, 10.5], [39.8, 10.5], [39.8, 14.5], [39.2, 14.5], [39.2, 10.5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "director-archive",
+      "properties": {
+        "name": "Archive cabinet",
+        "kind": "shelf"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[39.2, 18], [39.8, 18], [39.8, 23], [39.2, 23], [39.2, 18]]]
+      }
+    }
+  ]
+}

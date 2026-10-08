@@ -1,0 +1,294 @@
+@use "sass:map";
+@use "sass:color";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+// Respect users who prefer less motion: kill smooth scrolling and collapse
+// every transition/animation to be effectively instant.
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Design tokens (theme-independent) — spacing, radius, type, elevation, motion.
+// Use these for margin / padding / gap / border-radius etc. instead of literals
+// so the whole app stays on one scale.
+// ---------------------------------------------------------------------------
+:root {
+  // Spacing scale (0.25rem step) — margin, padding, gap.
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  // Border radius.
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  // Typography.
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.15rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  // Elevation (the dark theme overrides these further down).
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 8%);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 12%);
+  --shadow-lg: 0 20px 50px rgb(0 0 0 / 25%);
+
+  // Motion.
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+
+  // Stacking order.
+  --z-topbar: 10;
+  --z-backdrop: 15;
+  --z-sidebar: 20;
+  --z-dropdown: 40;
+  --z-dialog: 50;
+
+  // App-shell dimensions.
+  --sidebar-width: 15rem;
+  --topbar-height: 4.5rem;
+}
+
+// ---------------------------------------------------------------------------
+// Themes
+// ---------------------------------------------------------------------------
+
+// Theme used when no data-theme attribute is set.
+$default-theme: light;
+
+// Per colour: `base` is required. `contrast` = text ON the fill.
+// `text` = the colour used AS text (defaults to base). `soft` = tint alpha (defaults to 0.12).
+// `shift` = what hover/active mix toward: black on light, white on dark.
+$themes: (
+  light: (
+    scheme: light,
+    shift: black,
+    neutrals: (
+      bg: #fbf9fb,
+      surface: #ffffff,
+      surface-2: #f7f3f6,
+      surface-3: #efe8ee,
+      text: #20131f,
+      text-muted: #6b5a69,
+      border: #e9e1e8,
+      border-strong: #d4c7d2,
+      content-bg: #f1ecf0,
+      field-bg: #f5f0f4,
+    ),
+    colors: (
+      primary: (
+        base: #61385c,
+        contrast: #ffffff,
+      ),
+      secondary: (
+        base: #d680cd,
+        contrast: #2a0d27,
+        text: #a0409a,
+        soft: 0.16,
+      ),
+      accent: (
+        base: #b63a86,
+        contrast: #ffffff,
+      ),
+      success: (
+        base: #15803d,
+        contrast: #ffffff,
+        soft: 0.1,
+      ),
+      warning: (
+        base: #d97706,
+        contrast: #2a1c00,
+        text: #b45309,
+      ),
+      error: (
+        base: #dc2626,
+        contrast: #ffffff,
+        text: #b91c1c,
+        soft: 0.1,
+      ),
+      info: (
+        base: #2563eb,
+        contrast: #ffffff,
+        soft: 0.1,
+      ),
+    ),
+    aliases: (
+      sidebar-bg: var(--surface),
+      topbar-bg: var(--surface),
+      focus-ring: var(--accent),
+    ),
+  ),
+  dark: (
+    scheme: dark,
+    shift: white,
+    neutrals: (
+      bg: #060406,
+      surface: #110c10,
+      surface-2: #1a1319,
+      surface-3: #231a22,
+      text: #ecdfeb,
+      text-muted: #9d8f9b,
+      border: #2a2029,
+      border-strong: #3d2f3b,
+      content-bg: #030203,
+      field-bg: #1a1319,
+    ),
+    colors: (
+      primary: (
+        base: #c79ec2,
+        contrast: #1f0f1d,
+        soft: 0.16,
+      ),
+      secondary: (
+        base: #7f2976,
+        contrast: #ffffff,
+        text: #c77bbd,
+        soft: 0.24,
+      ),
+      accent: (
+        base: #c54996,
+        contrast: #12030c,
+        text: #d56aac,
+        soft: 0.16,
+      ),
+      success: (
+        base: #34d399,
+        contrast: #06231a,
+        soft: 0.16,
+      ),
+      warning: (
+        base: #fbbf24,
+        contrast: #2a1c00,
+        soft: 0.16,
+      ),
+      error: (
+        base: #f87171,
+        contrast: #2a0a0a,
+        soft: 0.16,
+      ),
+      info: (
+        base: #60a5fa,
+        contrast: #0a1a33,
+        soft: 0.16,
+      ),
+    ),
+    aliases: (
+      sidebar-bg: var(--surface),
+      topbar-bg: var(--surface),
+      focus-ring: var(--accent),
+      // Shadows need more opacity on dark to register at all.
+      shadow-sm: 0 1px 2px rgb(0 0 0 / 40%),
+      shadow-md: 0 8px 24px rgb(0 0 0 / 50%),
+      shadow-lg: 0 20px 50px rgb(0 0 0 / 65%),
+    ),
+  ),
+);
+
+@mixin theme-tokens($theme) {
+  $shift: map.get($theme, shift);
+
+  color-scheme: map.get($theme, scheme);
+
+  @each $name, $value in map.get($theme, neutrals) {
+    --#{$name}: #{$value};
+  }
+
+  @each $name, $c in map.get($theme, colors) {
+    $base: map.get($c, base);
+
+    --#{$name}: #{$base};
+    --#{$name}-hover: #{color.mix($shift, $base, 10%)};
+    --#{$name}-active: #{color.mix($shift, $base, 20%)};
+    --#{$name}-contrast: #{map.get($c, contrast)};
+    --#{$name}-text: #{map.get($c, text) or $base};
+    --#{$name}-soft: #{color.change($base, $alpha: map.get($c, soft) or 0.12)};
+  }
+
+  @each $name, $value in map.get($theme, aliases) {
+    --#{$name}: #{$value};
+  }
+}
+
+@each $theme-name, $theme in $themes {
+  // :root[...] keeps specificity above the plain :root token block,
+  // so the dark shadow overrides actually win.
+  $selector: ':root[data-theme="#{$theme-name}"]';
+
+  @if $theme-name == $default-theme {
+    $selector: ":root, #{$selector}";
+  }
+
+  #{$selector} {
+    @include theme-tokens($theme);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Base elements
+// ---------------------------------------------------------------------------
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition:
+    background var(--transition-base),
+    color var(--transition-base);
+}
+
+// The DialogProvider renders each dialog inside a native <dialog>, so style it
+// globally here (the shell has no class of its own).
+dialog {
+  margin: auto;
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+
+  &::backdrop {
+    background: rgb(0 0 0 / 45%);
+    backdrop-filter: blur(2px);
+  }
+}

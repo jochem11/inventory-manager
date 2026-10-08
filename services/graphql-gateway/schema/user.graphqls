@@ -1,0 +1,68 @@
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  "E.164, e.g. +31612345678."
+  phone: String
+  avatarUrl: String
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type UserConnection {
+  "Users matching the filter across all pages."
+  totalCount: Int!
+  nodes: [User!]!
+}
+
+enum UserSortField {
+  FIRST_NAME
+  LAST_NAME
+  EMAIL
+  PHONE
+  CREATED_AT
+  UPDATED_AT
+}
+
+input UserOrder {
+  field: UserSortField!
+  direction: SortDirection! = ASC
+}
+
+"Every set field must match as a case-insensitive substring."
+input UserFilter {
+  "Matches any of the name (including first + last), email or phone."
+  search: String
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+}
+
+"""
+A user's editable fields. On update every field is replaced, so leaving
+phone or avatarUrl out clears it.
+"""
+input UserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  avatarUrl: String
+}
+
+extend type Query {
+  "Null when no user has this id."
+  user(id: ID!): User @hasPermission(permission: "users:read")
+  "Without orderBy, users come back in roughly creation order."
+  users(offset: Int! = 0, limit: Int! = 25, orderBy: UserOrder, filter: UserFilter): UserConnection!
+    @hasPermission(permission: "users:read")
+}
+
+extend type Mutation {
+  createUser(input: UserInput!): User! @hasPermission(permission: "users:write")
+  updateUser(id: ID!, input: UserInput!): User! @hasPermission(permission: "users:write")
+  "Returns the id of the deleted user."
+  deleteUser(id: ID!): ID! @hasPermission(permission: "users:write")
+}

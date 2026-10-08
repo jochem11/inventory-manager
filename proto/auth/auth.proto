@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package auth;
+
+import "google/protobuf/timestamp.proto";
+
+// AuthService manages logins: registering, activating the account by email,
+// and the tokens that keep a user logged in.
+//
+// Tokens: an access token is a short-lived JWT (about 15 minutes) that the
+// gateway verifies with the keys from GetPublicKeys, without calling this
+// service. A refresh token is a random string that lasts as long as its
+// session and is exchanged for new tokens with Refresh; only its hash is
+// stored. Logout ends the session, so the refresh token stops working.
+//
+// Errors use gRPC status codes: INVALID_ARGUMENT (with google.rpc.BadRequest
+// details listing each invalid field), ALREADY_EXISTS for an email that is
+// already registered, UNAUTHENTICATED for a wrong email or password or an
+// invalid, expired or revoked token, and FAILED_PRECONDITION for logging in
+// before the email is verified.
+service AuthService {
+  // Register creates the user (in the user-service) and its login, then
+  // emails an activation link. The user can't log in until VerifyEmail.
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  // VerifyEmail activates the account with the token from the link. Each
+  // link works once.
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
+  // ResendVerification emails a new activation link, which replaces the
+  // earlier ones. It succeeds even for unknown or already verified emails,
+  // so it can't be used to find out who has an account.
+  rpc ResendVerification(ResendVerificationRequest) returns (ResendVerificationResponse);
+  // Login starts a session and returns its first tokens.
+  rpc Login(LoginRequest) returns (LoginResponse);
+  // Refresh exchanges a refresh token for new tokens. The old refresh token
+  // stops working.
+  rpc Refresh(RefreshRequest) returns (RefreshResponse);
+  // Logout ends the session of a refresh token. Access tokens already issued
+  // stay valid until they expire.
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  // GetPublicKeys returns the keys that verify access tokens, so other
+  // services can check them without calling Login or Refresh.
+  rpc GetPublicKeys(GetPublicKeysRequest) returns (GetPublicKeysResponse);
+}
+
+// Tokens is what Login and Refresh return.
+message Tokens {
+  // The logged-in user, the same as the access token's sub.
+  string user_id = 5;
+  // JWT for the Authorization header. Claims: sub (user id), sid (session
+  // id), permissions, exp.
+  string access_token = 1;
+  google.protobuf.Timestamp access_token_expires_at = 2;
+  // Opaque; the gateway keeps it in an httpOnly cookie.
+  string refresh_token = 3;
+  // When the session ends and the user has to log in again.
+  google.protobuf.Timestamp refresh_token_expires_at = 4;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  // Profile fields, passed on to the user-service.
+  string first_name = 3;
+  string last_name = 4;
+  optional string phone = 5;
+}
+
+message RegisterResponse {
+  // The new user's id, the same in the user-service and in access tokens.
+  string user_id = 1;
+}
+
+message VerifyEmailRequest {
+  string token = 1;
+}
+
+message VerifyEmailResponse {}
+
+message ResendVerificationRequest {
+  string email = 1;
+}
+
+message ResendVerificationResponse {}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  Tokens tokens = 1;
+}
+
+message RefreshRequest {
+  string refresh_token = 1;
+}
+
+message RefreshResponse {
+  Tokens tokens = 1;
+}
+
+// Logout takes the refresh token rather than the access token, so it also
+// works after the access token has expired.
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message LogoutResponse {}
+
+message GetPublicKeysRequest {}
+
+message GetPublicKeysResponse {
+  repeated PublicKey keys = 1;
+}
+
+// PublicKey verifies access tokens whose JWT header has this key id. More
+// than one is returned while keys are being rotated.
+message PublicKey {
+  // The JWT header's "kid".
+  string key_id = 1;
+  // The JWT "alg", e.g. "EdDSA".
+  string algorithm = 2;
+  // PKIX (SubjectPublicKeyInfo) DER encoding.
+  bytes public_key = 3;
+}

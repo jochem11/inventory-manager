@@ -1,0 +1,28 @@
+.avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--primary-contrast);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.02em;
+
+  &--sm {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.625rem;
+  }
+
+  &--md {
+    width: 2rem;
+    height: 2rem;
+    font-size: var(--text-xs);
+  }
+
+  &--lg {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: var(--text-sm);
+  }
+}

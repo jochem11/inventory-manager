@@ -1,0 +1,46 @@
+"""
+What login and refreshToken return. The refresh token itself never appears
+here: the gateway keeps it in an httpOnly cookie.
+"""
+type AuthPayload {
+  "Send as `Authorization: Bearer <accessToken>`."
+  accessToken: String!
+  "Refresh before this, with refreshToken."
+  accessTokenExpiresAt: Time!
+  "The logged-in user's profile; null if it doesn't exist yet."
+  user: User
+  "The roles in the access token, e.g. user, admin."
+  roles: [String!]!
+  "The permissions in the access token, e.g. users:read. Prefer checking these over roles."
+  permissions: [String!]!
+}
+
+input RegisterInput {
+  email: String!
+  "At least 8 characters."
+  password: String!
+  firstName: String!
+  lastName: String!
+  "E.164, e.g. +31612345678."
+  phone: String
+}
+
+extend type Query {
+  "The logged-in user. Errors with UNAUTHENTICATED when not logged in."
+  me: User @authenticated
+}
+
+extend type Mutation {
+  "Creates an account and emails an activation link. Returns the new user's id."
+  register(input: RegisterInput!): ID!
+  "Activates an account with the token from the activation link."
+  verifyEmail(token: String!): Boolean!
+  "Emails a new activation link. Always true, so it reveals nothing about which emails exist."
+  resendVerification(email: String!): Boolean!
+  "Logs in and sets the refresh token cookie. FAILED_PRECONDITION until the email is verified."
+  login(email: String!, password: String!): AuthPayload!
+  "New tokens from the refresh token cookie; the cookie is replaced. UNAUTHENTICATED when the session is over."
+  refreshToken: AuthPayload!
+  "Ends the session and clears the cookie."
+  logout: Boolean!
+}

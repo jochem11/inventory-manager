@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package user;
+
+import "google/protobuf/timestamp.proto";
+
+// UserEvent is every message on the user.events topic. The message key is
+// the user id, so one user's events stay in order.
+message UserEvent {
+  // Unique per event; consumers use it to skip events they already handled,
+  // since Kafka can deliver a message more than once.
+  string event_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+  oneof payload {
+    UserDeleted user_deleted = 10;
+  }
+}
+
+// UserDeleted: the user was deleted. The auth-service deletes their login
+// and sessions.
+message UserDeleted {
+  string user_id = 1;
+}

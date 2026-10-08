@@ -1,0 +1,164 @@
+.geo-map {
+  position: relative;
+  // Leaflet stacks panes/controls at z-index 400–1000; contain them so they
+  // can't float over the sticky topbar or dialogs.
+  isolation: isolate;
+  height: var(--geo-map-height, 28rem);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+
+  &__loading {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  // Doubled class beats Leaflet's own `.leaflet-container` rules.
+  &__canvas.leaflet-container {
+    height: 100%;
+    // A faint 1-unit-ish grid so empty space still reads as "floor".
+    background-color: var(--surface-2);
+    background-image: radial-gradient(var(--border-strong) 1px, transparent 1px);
+    background-size: 20px 20px;
+    font: inherit;
+  }
+
+  // --- Shapes -------------------------------------------------------------
+  // CSS beats the presentation attributes Leaflet writes onto each <path>.
+  &__shape {
+    fill: var(--primary-soft);
+    fill-opacity: 1;
+    stroke: var(--primary);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    transition:
+      fill var(--transition-fast),
+      stroke var(--transition-fast);
+
+    &:hover {
+      fill: color-mix(in srgb, var(--primary) 22%, transparent);
+    }
+
+    &--shelf {
+      fill: var(--secondary-soft);
+      stroke: var(--secondary-text);
+      stroke-width: 1.5;
+
+      &:hover {
+        fill: color-mix(in srgb, var(--secondary) 35%, transparent);
+      }
+    }
+
+    // Circulation: corridors, stairs. Quiet, so rooms stand out.
+    &--area {
+      fill: var(--surface);
+      stroke: var(--border-strong);
+      stroke-width: 1;
+      stroke-dasharray: 4 3;
+
+      &:hover {
+        fill: var(--surface-3);
+      }
+    }
+
+    &--selected,
+    &--selected:hover {
+      fill: color-mix(in srgb, var(--accent) 28%, transparent);
+      stroke: var(--accent);
+      stroke-width: 3;
+      stroke-dasharray: none;
+    }
+  }
+
+  &__image {
+    opacity: 0.6;
+  }
+
+  // --- Leaflet / Geoman chrome ---------------------------------------------
+  .leaflet-bar {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+
+    a {
+      border-bottom-color: var(--border);
+      background: var(--surface);
+      color: var(--text);
+
+      &:hover {
+        background: var(--surface-2);
+      }
+    }
+
+    a.leaflet-disabled {
+      background: var(--surface);
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+  }
+
+  .leaflet-pm-toolbar .button-container.active a.leaflet-buttons-control-button {
+    background: var(--primary-soft);
+  }
+
+  // Finish / Cancel pills Geoman shows next to an active tool.
+  .leaflet-pm-actions-container .leaflet-pm-action {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  // `& &__x` (= `.geo-map .geo-map__x`) so these beat Leaflet's own
+  // `.leaflet-tooltip` rules, whose stylesheet loads after this one.
+  & &__tooltip {
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    color: var(--text);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+
+    &::before {
+      display: none;
+    }
+  }
+
+  // Names printed on the shapes: plain text, no box, never catches clicks.
+  & &__label {
+    width: max-content;
+    max-width: 6.5rem;
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+    color: var(--text);
+    font-size: 0.6875rem;
+    font-weight: var(--font-medium);
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+    text-shadow:
+      0 0 2px var(--surface),
+      0 0 4px var(--surface);
+    pointer-events: none;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  & &__label--hidden {
+    visibility: hidden;
+  }
+}
+
+// Geoman's toolbar icons are dark SVGs; flip them for the dark theme.
+:root[data-theme="dark"] .geo-map .leaflet-pm-toolbar .control-icon {
+  filter: invert(0.9);
+}

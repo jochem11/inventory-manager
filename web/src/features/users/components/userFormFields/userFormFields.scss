@@ -1,0 +1,9 @@
+.user-form-fields__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+
+  @media (width < 30rem) {
+    grid-template-columns: 1fr;
+  }
+}

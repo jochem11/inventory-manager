@@ -1,0 +1,34 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topbar);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--topbar-height);
+  padding: 0 var(--space-8);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--topbar-bg) 85%, transparent);
+  backdrop-filter: blur(10px);
+
+  &__start,
+  &__end {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  &__start {
+    flex-shrink: 1;
+  }
+
+  &__end {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  @media (width < 56rem) {
+    padding: 0 var(--space-4);
+  }
+}

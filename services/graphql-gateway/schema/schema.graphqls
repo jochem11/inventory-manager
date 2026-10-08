@@ -1,0 +1,27 @@
+# Shared types. Every list follows the same convention:
+#   things(offset, limit, orderBy, filter): ThingConnection!
+# with offset ≥ 0 and limit 1 to 100. Errors carry extensions.code:
+# BAD_USER_INPUT, NOT_FOUND, CONFLICT or INTERNAL.
+
+# Guards: put one on a field to protect it. They check the access token
+# before the resolver runs. A response with a FORBIDDEN error has HTTP status 403.
+
+"Needs a login: otherwise UNAUTHENTICATED."
+directive @authenticated on FIELD_DEFINITION
+
+"Needs a login with this permission (e.g. users:read): otherwise FORBIDDEN."
+directive @hasPermission(permission: String!) on FIELD_DEFINITION
+
+"Needs a login with at least one of these roles (e.g. admin): otherwise FORBIDDEN."
+directive @hasRole(roles: [String!]!) on FIELD_DEFINITION
+
+scalar Time
+
+enum SortDirection {
+  ASC
+  DESC
+}
+
+type Query
+
+type Mutation

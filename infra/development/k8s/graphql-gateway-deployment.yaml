@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphql-gateway
+  labels:
+    app: graphql-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graphql-gateway
+  template:
+    metadata:
+      labels:
+        app: graphql-gateway
+    spec:
+      containers:
+        - name: graphql-gateway
+          image: inventory-manager/graphql-gateway
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4000
+              name: http
+          env:
+            - name: HTTP_ADDR
+              value: ":4000"
+            # The user-service Service; grpc-go wants host:port, no scheme.
+            - name: USER_SERVICE_ADDR
+              value: "user-service:50051"
+            - name: AUTH_SERVICE_ADDR
+              value: "auth-service:50052"
+            # The web app's origin, allowed to call the gateway with cookies.
+            - name: ALLOWED_ORIGINS
+              value: "http://localhost:3000"
+            # Accessing an env variable from the app-config config map
+            - name: ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  key: ENVIRONMENT
+                  name: app-config
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+                  name: app-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphql-gateway
+spec:
+  ports:
+    - name: http
+      port: 4000
+      targetPort: http
+  selector:
+    app: graphql-gateway

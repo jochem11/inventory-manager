@@ -1,0 +1,414 @@
+[
+  {
+    "id": "item-046",
+    "name": "Paper towels",
+    "quantity": 20,
+    "category": "other",
+    "notes": "Kitchen \u00b7 Pantry cupboard",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-047",
+    "name": "First aid kit",
+    "quantity": 12,
+    "category": "other",
+    "notes": "Kitchen \u00b7 Pantry cupboard",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-036",
+    "name": "Label printer tape",
+    "quantity": 6,
+    "category": "electrical",
+    "notes": "Server room \u00b7 Server rack",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-038",
+    "name": "Wireless mouse",
+    "quantity": 50,
+    "category": "electrical",
+    "notes": "Amsterdam \u00b7 AV cabinet",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-033",
+    "name": "AAA batteries",
+    "quantity": 6,
+    "category": "electrical",
+    "notes": "Open workspace \u00b7 Supply shelf",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-003",
+    "name": "Screwdriver set",
+    "quantity": 10,
+    "category": "tools",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-018",
+    "name": "M6 bolts",
+    "quantity": 4,
+    "category": "hardware",
+    "notes": "Print & copy \u00b7 Paper storage",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-027",
+    "name": "Zip bags",
+    "quantity": 10,
+    "category": "hardware",
+    "notes": "Print & copy \u00b7 Paper storage",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-049",
+    "name": "Hand soap",
+    "quantity": 5,
+    "category": "other",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-015",
+    "name": "Clamp set",
+    "quantity": 10,
+    "category": "tools",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-051",
+    "name": "Trash bags",
+    "quantity": 1,
+    "category": "other",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-028",
+    "name": "Extension cord 5m",
+    "quantity": 6,
+    "category": "electrical",
+    "notes": "Server room \u00b7 Server rack",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-019",
+    "name": "Cable ties",
+    "quantity": 1,
+    "category": "hardware",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-026",
+    "name": "Velcro strips",
+    "quantity": 4,
+    "category": "hardware",
+    "notes": "Print & copy \u00b7 Paper storage",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-013",
+    "name": "Staple gun",
+    "quantity": 10,
+    "category": "tools",
+    "notes": "Server room \u00b7 Server rack",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-021",
+    "name": "Duct tape",
+    "quantity": 4,
+    "category": "hardware",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-034",
+    "name": "LED bulb E27",
+    "quantity": 1,
+    "category": "electrical",
+    "notes": "Amsterdam \u00b7 AV cabinet",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-012",
+    "name": "Hot glue gun",
+    "quantity": 12,
+    "category": "tools",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-022",
+    "name": "Masking tape",
+    "quantity": 10,
+    "category": "hardware",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-007",
+    "name": "Adjustable wrench",
+    "quantity": 12,
+    "category": "tools",
+    "notes": "Server room \u00b7 Server rack",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-001",
+    "name": "Cordless drill",
+    "quantity": 4,
+    "category": "tools",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-044",
+    "name": "Sticky notes",
+    "quantity": 5,
+    "category": "other",
+    "notes": "Kitchen \u00b7 Pantry cupboard",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-037",
+    "name": "Laptop stand",
+    "quantity": 5,
+    "category": "electrical",
+    "notes": "Open workspace \u00b7 Supply shelf",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-043",
+    "name": "Whiteboard markers",
+    "quantity": 3,
+    "category": "other",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-016",
+    "name": "Wood screws 4x40",
+    "quantity": 8,
+    "category": "hardware",
+    "notes": "Print & copy \u00b7 Paper storage",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-009",
+    "name": "Socket set",
+    "quantity": 2,
+    "category": "tools",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-029",
+    "name": "Power strip",
+    "quantity": 3,
+    "category": "electrical",
+    "notes": "Amsterdam \u00b7 AV cabinet",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-011",
+    "name": "Stud finder",
+    "quantity": 10,
+    "category": "tools",
+    "notes": "Storage \u00b7 Rack B",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-045",
+    "name": "Coffee beans",
+    "quantity": 10,
+    "category": "other",
+    "notes": "Open workspace \u00b7 Supply shelf",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-004",
+    "name": "Tape measure",
+    "quantity": 2,
+    "category": "tools",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-050",
+    "name": "Dish soap",
+    "quantity": 12,
+    "category": "other",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-006",
+    "name": "Utility knife",
+    "quantity": 10,
+    "category": "tools",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-020",
+    "name": "Picture hooks",
+    "quantity": 3,
+    "category": "hardware",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-035",
+    "name": "Ethernet cable 3m",
+    "quantity": 1,
+    "category": "electrical",
+    "notes": "Boardroom \u00b7 AV cabinet",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-048",
+    "name": "Fire blanket",
+    "quantity": 50,
+    "category": "other",
+    "notes": "Kitchen \u00b7 Pantry cupboard",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-030",
+    "name": "HDMI cable",
+    "quantity": 1,
+    "category": "electrical",
+    "notes": "Server room \u00b7 Server rack",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-032",
+    "name": "AA batteries",
+    "quantity": 5,
+    "category": "electrical",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-042",
+    "name": "Printer paper A4",
+    "quantity": 2,
+    "category": "other",
+    "notes": "Kitchen \u00b7 Pantry cupboard",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-008",
+    "name": "Pliers",
+    "quantity": 0,
+    "category": "tools",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-031",
+    "name": "USB-C charger",
+    "quantity": 10,
+    "category": "electrical",
+    "notes": "Amsterdam \u00b7 AV cabinet",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-053",
+    "name": "Stapler",
+    "quantity": 10,
+    "category": "other",
+    "notes": "Print & copy \u00b7 Paper storage",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-039",
+    "name": "Keyboard",
+    "quantity": 3,
+    "category": "electrical",
+    "notes": "Amsterdam \u00b7 AV cabinet",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-023",
+    "name": "Hinges",
+    "quantity": 5,
+    "category": "hardware",
+    "notes": "Storage \u00b7 Rack B",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-017",
+    "name": "Wall plugs 6mm",
+    "quantity": 6,
+    "category": "hardware",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-041",
+    "name": "Webcam",
+    "quantity": 1,
+    "category": "electrical",
+    "notes": "Server room \u00b7 Server rack",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-010",
+    "name": "Hex key set",
+    "quantity": 5,
+    "category": "tools",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-025",
+    "name": "Shelf brackets",
+    "quantity": 1,
+    "category": "hardware",
+    "notes": "Storage \u00b7 Rack A",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-052",
+    "name": "Envelopes",
+    "quantity": 10,
+    "category": "other",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-014",
+    "name": "Hand saw",
+    "quantity": 1,
+    "category": "tools",
+    "notes": "Server room \u00b7 Server rack",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-005",
+    "name": "Spirit level",
+    "quantity": 2,
+    "category": "tools",
+    "lowStockAlert": true
+  },
+  {
+    "id": "item-002",
+    "name": "Hammer",
+    "quantity": 0,
+    "category": "tools",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-040",
+    "name": "Headset",
+    "quantity": 12,
+    "category": "electrical",
+    "notes": "Amsterdam \u00b7 AV cabinet",
+    "lowStockAlert": false
+  },
+  {
+    "id": "item-024",
+    "name": "Door stopper",
+    "quantity": 1,
+    "category": "hardware",
+    "notes": "Print & copy \u00b7 Paper storage",
+    "lowStockAlert": true
+  }
+]
