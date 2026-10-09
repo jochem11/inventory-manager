@@ -21,6 +21,11 @@ spec:
           ports:
             - containerPort: 4000
               name: http
+          # The settings every service shares (app-config.yaml): ENVIRONMENT,
+          # DB_HOST/DB_PORT, OTEL_EXPORTER_OTLP_ENDPOINT, KAFKA_BROKERS.
+          envFrom:
+            - configMapRef:
+                name: app-config
           env:
             - name: HTTP_ADDR
               value: ":4000"
@@ -29,20 +34,11 @@ spec:
               value: "user-service:50051"
             - name: AUTH_SERVICE_ADDR
               value: "auth-service:50052"
+            - name: ITEM_SERVICE_ADDR
+              value: "item-service:50053"
             # The web app's origin, allowed to call the gateway with cookies.
             - name: ALLOWED_ORIGINS
               value: "http://localhost:3000"
-            # Accessing an env variable from the app-config config map
-            - name: ENVIRONMENT
-              valueFrom:
-                configMapKeyRef:
-                  key: ENVIRONMENT
-                  name: app-config
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              valueFrom:
-                configMapKeyRef:
-                  key: OTEL_EXPORTER_OTLP_ENDPOINT
-                  name: app-config
           resources:
             requests:
               cpu: "100m"

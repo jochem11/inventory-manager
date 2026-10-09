@@ -5,6 +5,7 @@ package graph
 
 import (
 	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/auth"
+	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/item"
 	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/user"
 )
 
@@ -12,4 +13,5 @@ import (
 type Resolver struct {
 	UserResolver *user.Resolver
 	AuthResolver *auth.Resolver
+	ItemResolver *item.Resolver
 }

@@ -35,6 +35,15 @@ export const errorMessage = (error: unknown) => {
   return message.charAt(0).toUpperCase() + message.slice(1);
 };
 
+/**
+ * errorMessage, but for BAD_USER_INPUT it lists the message of every invalid
+ * field, e.g. "Phone must be a valid E.164 formatted phone number".
+ */
+export const fieldErrorMessage = (error: unknown) =>
+  hasCode(error, "BAD_USER_INPUT") && error instanceof GraphQLRequestError && error.fields
+    ? Object.values(error.fields).join(". ")
+    : errorMessage(error);
+
 type GraphQLResponse<T> = {
   data?: T | null;
   errors?: { message: string; extensions?: { code?: ErrorCode; fields?: Record<string, string> } }[];

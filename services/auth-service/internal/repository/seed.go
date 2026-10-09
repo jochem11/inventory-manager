@@ -7,6 +7,7 @@ import (
 	"github.com/jochem11/inventory-manager/services/auth-service/internal/domain"
 	"github.com/jochem11/inventory-manager/services/auth-service/internal/models"
 	"github.com/jochem11/inventory-manager/shared/auth"
+	"github.com/jochem11/inventory-manager/shared/database"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +17,8 @@ import (
 // before roles existed), and the admin role to the identities with an email in
 // adminEmails.
 func Seed(ctx context.Context, db *gorm.DB, adminEmails []string) error {
-	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	return database.Transaction(ctx, db, func(ctx context.Context) error {
+		tx := database.DB(ctx, db)
 		for name, permissionNames := range auth.RolePermissions {
 			role := models.Role{Name: name}
 			if err := tx.Where(models.Role{Name: name}).FirstOrCreate(&role).Error; err != nil {

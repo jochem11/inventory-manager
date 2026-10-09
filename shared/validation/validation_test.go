@@ -5,7 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/jochem11/inventory-manager/services/user-service/internal/domain"
+	"github.com/jochem11/inventory-manager/shared/errs"
+	"github.com/jochem11/inventory-manager/shared/paging"
 )
 
 type address struct {
@@ -59,9 +60,9 @@ func TestCleanReportsFieldsByJSONPath(t *testing.T) {
 	}
 	err := Clean(context.Background(), f)
 
-	var invalid *domain.ValidationError
+	var invalid *errs.ValidationError
 	if !errors.As(err, &invalid) {
-		t.Fatalf("want a *domain.ValidationError, got %v", err)
+		t.Fatalf("want an *errs.ValidationError, got %v", err)
 	}
 	want := map[string]string{
 		"name":      "name must be a maximum of 5 characters in length",
@@ -85,5 +86,29 @@ func TestCleanValid(t *testing.T) {
 	f := &form{Name: "Ada", Website: ptr("https://example.com"), Home: address{City: "Utrecht"}}
 	if err := Clean(context.Background(), f); err != nil {
 		t.Fatalf("valid input: %v", err)
+	}
+}
+
+// Tags on an embedded struct, like paging.Params in a list's parameters,
+// apply as if the fields were declared directly.
+func TestCleanEmbeddedPaging(t *testing.T) {
+	type list struct {
+		paging.Params
+		Search string `json:"search" mod:"trim"`
+	}
+
+	params := list{Search: "  ada "}
+	if err := Clean(context.Background(), &params); err != nil {
+		t.Fatal(err)
+	}
+	if params.Limit != 10 || params.Search != "ada" {
+		t.Errorf("got limit %d, search %q; want 10 and \"ada\"", params.Limit, params.Search)
+	}
+
+	params = list{Params: paging.Params{Offset: -1, Limit: 500}}
+	var invalid *errs.ValidationError
+	if err := Clean(context.Background(), &params); !errors.As(err, &invalid) ||
+		invalid.Fields["offset"] == "" || invalid.Fields["limit"] == "" {
+		t.Errorf("want errors for offset and limit, got %v", err)
 	}
 }

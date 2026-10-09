@@ -1,0 +1,9 @@
+.named-records {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  &__name {
+    font-weight: var(--font-medium);
+  }
+}

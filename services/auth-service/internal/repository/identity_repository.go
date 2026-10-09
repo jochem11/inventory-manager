@@ -8,6 +8,7 @@ import (
 
 	"github.com/jochem11/inventory-manager/services/auth-service/internal/domain"
 	"github.com/jochem11/inventory-manager/services/auth-service/internal/models"
+	"github.com/jochem11/inventory-manager/shared/database"
 	"github.com/jochem11/inventory-manager/shared/kafka"
 	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
@@ -22,14 +23,8 @@ func NewIdentityRepository(db *gorm.DB) domain.IdentityRepository {
 	return &IdentityRepositoryImp{db: db}
 }
 
-func (r *IdentityRepositoryImp) Transaction(ctx context.Context, fn func(repo domain.IdentityRepository) error) error {
-	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		return fn(&IdentityRepositoryImp{db: tx})
-	})
-}
-
 func (r *IdentityRepositoryImp) CreateIdentity(ctx context.Context, identity *models.Identity) error {
-	if err := r.db.WithContext(ctx).Create(identity).Error; err != nil {
+	if err := database.DB(ctx, r.db).Create(identity).Error; err != nil {
 		return fmt.Errorf("create identity: %w", translateError(err))
 	}
 	return nil
@@ -37,7 +32,7 @@ func (r *IdentityRepositoryImp) CreateIdentity(ctx context.Context, identity *mo
 
 func (r *IdentityRepositoryImp) FindIdentityByID(ctx context.Context, id string) (*models.Identity, error) {
 	var identity models.Identity
-	if err := r.db.WithContext(ctx).First(&identity, "id = ?", id).Error; err != nil {
+	if err := database.DB(ctx, r.db).First(&identity, "id = ?", id).Error; err != nil {
 		return nil, fmt.Errorf("find identity %q: %w", id, translateError(err))
 	}
 	return &identity, nil
@@ -45,14 +40,14 @@ func (r *IdentityRepositoryImp) FindIdentityByID(ctx context.Context, id string)
 
 func (r *IdentityRepositoryImp) FindIdentityByEmail(ctx context.Context, email string) (*models.Identity, error) {
 	var identity models.Identity
-	if err := r.db.WithContext(ctx).First(&identity, "email = ?", email).Error; err != nil {
+	if err := database.DB(ctx, r.db).First(&identity, "email = ?", email).Error; err != nil {
 		return nil, fmt.Errorf("find identity by email %q: %w", email, translateError(err))
 	}
 	return &identity, nil
 }
 
 func (r *IdentityRepositoryImp) SaveIdentity(ctx context.Context, identity *models.Identity) error {
-	if err := r.db.WithContext(ctx).Save(identity).Error; err != nil {
+	if err := database.DB(ctx, r.db).Save(identity).Error; err != nil {
 		return fmt.Errorf("save identity %q: %w", identity.ID, translateError(err))
 	}
 	return nil
@@ -60,7 +55,7 @@ func (r *IdentityRepositoryImp) SaveIdentity(ctx context.Context, identity *mode
 
 func (r *IdentityRepositoryImp) FindIdentityWithRoles(ctx context.Context, id string) (*models.Identity, error) {
 	var identity models.Identity
-	if err := r.db.WithContext(ctx).Preload("Roles.Permissions").First(&identity, "id = ?", id).Error; err != nil {
+	if err := database.DB(ctx, r.db).Preload("Roles.Permissions").First(&identity, "id = ?", id).Error; err != nil {
 		return nil, fmt.Errorf("find identity %q: %w", id, translateError(err))
 	}
 	return &identity, nil
@@ -68,10 +63,10 @@ func (r *IdentityRepositoryImp) FindIdentityWithRoles(ctx context.Context, id st
 
 func (r *IdentityRepositoryImp) AssignRole(ctx context.Context, identity *models.Identity, roleName string) error {
 	var role models.Role
-	if err := r.db.WithContext(ctx).First(&role, "name = ?", roleName).Error; err != nil {
+	if err := database.DB(ctx, r.db).First(&role, "name = ?", roleName).Error; err != nil {
 		return fmt.Errorf("find role %q: %w", roleName, err)
 	}
-	if err := r.db.WithContext(ctx).Model(identity).Association("Roles").Append(&role); err != nil {
+	if err := database.DB(ctx, r.db).Model(identity).Association("Roles").Append(&role); err != nil {
 		return fmt.Errorf("assign role %q: %w", roleName, err)
 	}
 	return nil
@@ -82,17 +77,17 @@ func (r *IdentityRepositoryImp) AssignRole(ctx context.Context, identity *models
 // Select("Roles") removes the role assignments.
 func (r *IdentityRepositoryImp) DeleteIdentityByUserID(ctx context.Context, userID string) error {
 	var identity models.Identity
-	if err := r.db.WithContext(ctx).First(&identity, "user_id = ?", userID).Error; err != nil {
+	if err := database.DB(ctx, r.db).First(&identity, "user_id = ?", userID).Error; err != nil {
 		return fmt.Errorf("find identity of user %q: %w", userID, translateError(err))
 	}
-	if err := r.db.WithContext(ctx).Unscoped().Select("Roles").Delete(&identity).Error; err != nil {
+	if err := database.DB(ctx, r.db).Unscoped().Select("Roles").Delete(&identity).Error; err != nil {
 		return fmt.Errorf("delete identity of user %q: %w", userID, err)
 	}
 	return nil
 }
 
 func (r *IdentityRepositoryImp) CreateToken(ctx context.Context, token *models.IdentityToken) error {
-	if err := r.db.WithContext(ctx).Create(token).Error; err != nil {
+	if err := database.DB(ctx, r.db).Create(token).Error; err != nil {
 		return fmt.Errorf("create token: %w", err)
 	}
 	return nil
@@ -100,7 +95,7 @@ func (r *IdentityRepositoryImp) CreateToken(ctx context.Context, token *models.I
 
 func (r *IdentityRepositoryImp) FindToken(ctx context.Context, purpose models.TokenPurpose, hash []byte) (*models.IdentityToken, error) {
 	var token models.IdentityToken
-	err := r.db.WithContext(ctx).
+	err := database.DB(ctx, r.db).
 		Clauses(clause.Locking{Strength: "UPDATE"}).
 		First(&token, "purpose = ? AND token_hash = ?", purpose, hash).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -113,14 +108,14 @@ func (r *IdentityRepositoryImp) FindToken(ctx context.Context, purpose models.To
 }
 
 func (r *IdentityRepositoryImp) SaveToken(ctx context.Context, token *models.IdentityToken) error {
-	if err := r.db.WithContext(ctx).Save(token).Error; err != nil {
+	if err := database.DB(ctx, r.db).Save(token).Error; err != nil {
 		return fmt.Errorf("save token: %w", err)
 	}
 	return nil
 }
 
 func (r *IdentityRepositoryImp) RetireTokens(ctx context.Context, identityID string, purpose models.TokenPurpose, now time.Time) error {
-	err := r.db.WithContext(ctx).Model(&models.IdentityToken{}).
+	err := database.DB(ctx, r.db).Model(&models.IdentityToken{}).
 		Where("identity_id = ? AND purpose = ? AND used_at IS NULL", identityID, purpose).
 		Update("used_at", now).Error
 	if err != nil {
@@ -130,7 +125,7 @@ func (r *IdentityRepositoryImp) RetireTokens(ctx context.Context, identityID str
 }
 
 func (r *IdentityRepositoryImp) CreateSession(ctx context.Context, session *models.Session) error {
-	if err := r.db.WithContext(ctx).Create(session).Error; err != nil {
+	if err := database.DB(ctx, r.db).Create(session).Error; err != nil {
 		return fmt.Errorf("create session: %w", err)
 	}
 	return nil
@@ -138,7 +133,7 @@ func (r *IdentityRepositoryImp) CreateSession(ctx context.Context, session *mode
 
 func (r *IdentityRepositoryImp) FindSessionByRefreshToken(ctx context.Context, hash []byte) (*models.Session, error) {
 	var session models.Session
-	err := r.db.WithContext(ctx).
+	err := database.DB(ctx, r.db).
 		Clauses(clause.Locking{Strength: "UPDATE"}).
 		First(&session, "refresh_token_hash = ?", hash).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -151,7 +146,7 @@ func (r *IdentityRepositoryImp) FindSessionByRefreshToken(ctx context.Context, h
 }
 
 func (r *IdentityRepositoryImp) SaveSession(ctx context.Context, session *models.Session) error {
-	if err := r.db.WithContext(ctx).Save(session).Error; err != nil {
+	if err := database.DB(ctx, r.db).Save(session).Error; err != nil {
 		return fmt.Errorf("save session %q: %w", session.ID, err)
 	}
 	return nil
@@ -161,15 +156,8 @@ func (r *IdentityRepositoryImp) Publish(ctx context.Context, topic, key, eventID
 	return kafka.Enqueue(ctx, r.db, topic, key, eventID, event)
 }
 
-// translateError maps GORM errors to domain errors. The email index is the
-// only unique key a client controls, so a duplicate means the email is taken.
-// It relies on gorm.Config.TranslateError.
+// translateError maps GORM errors to the auth-service's errors. The email
+// index is the only unique key an identity's input can hit.
 func translateError(err error) error {
-	switch {
-	case errors.Is(err, gorm.ErrRecordNotFound):
-		return domain.ErrIdentityNotFound
-	case errors.Is(err, gorm.ErrDuplicatedKey):
-		return domain.ErrEmailTaken
-	}
-	return err
+	return database.TranslateError(err, domain.ErrIdentityNotFound, domain.ErrEmailTaken)
 }

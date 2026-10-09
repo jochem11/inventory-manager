@@ -8,9 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net/mail"
 	"net/url"
-	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -19,7 +17,9 @@ import (
 	"github.com/jochem11/inventory-manager/services/auth-service/internal/models"
 	"github.com/jochem11/inventory-manager/services/auth-service/internal/token"
 	authpb "github.com/jochem11/inventory-manager/services/auth-service/pkg/pb/auth"
+	"github.com/jochem11/inventory-manager/shared/database"
 	"github.com/jochem11/inventory-manager/shared/kafka"
+	"github.com/jochem11/inventory-manager/shared/validation"
 	"github.com/segmentio/ksuid"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -38,20 +38,22 @@ var dummyHash, _ = bcrypt.GenerateFromPassword([]byte("not a real password"), bc
 
 type AuthServiceImp struct {
 	identities domain.IdentityRepository
-	tokens     *token.Issuer
+	// tx makes several repository calls atomic.
+	tx     database.Transactor
+	tokens *token.Issuer
 	// verifyURL is the web page that reads ?token= from the activation link
 	// and calls VerifyEmail.
 	verifyURL string
 	now       func() time.Time
 }
 
-func NewAuthService(identities domain.IdentityRepository, tokens *token.Issuer, verifyURL string) domain.AuthService {
-	return &AuthServiceImp{identities: identities, tokens: tokens, verifyURL: verifyURL, now: time.Now}
+func NewAuthService(identities domain.IdentityRepository, tx database.Transactor, tokens *token.Issuer, verifyURL string) domain.AuthService {
+	return &AuthServiceImp{identities: identities, tx: tx, tokens: tokens, verifyURL: verifyURL, now: time.Now}
 }
 
 func (s *AuthServiceImp) Register(ctx context.Context, input domain.RegisterInput) (string, error) {
-	input = normalize(input)
-	if err := validateRegister(input); err != nil {
+	// Trims and lower-cases the email, then checks the input's tags.
+	if err := validation.Clean(ctx, &input); err != nil {
 		return "", err
 	}
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
@@ -69,18 +71,18 @@ func (s *AuthServiceImp) Register(ctx context.Context, input domain.RegisterInpu
 		Email:        input.Email,
 		PasswordHash: string(passwordHash),
 	}
-	err = s.identities.Transaction(ctx, func(repo domain.IdentityRepository) error {
-		if err := repo.CreateIdentity(ctx, identity); err != nil {
+	err = s.tx.Transaction(ctx, func(ctx context.Context) error {
+		if err := s.identities.CreateIdentity(ctx, identity); err != nil {
 			return err
 		}
-		if err := repo.AssignRole(ctx, identity, domain.DefaultRole); err != nil {
+		if err := s.identities.AssignRole(ctx, identity, domain.DefaultRole); err != nil {
 			return err
 		}
-		if err := repo.CreateToken(ctx, s.verificationToken(identity, tokenHash)); err != nil {
+		if err := s.identities.CreateToken(ctx, s.verificationToken(identity, tokenHash)); err != nil {
 			return err
 		}
 		eventID := kafka.NewEventID()
-		return repo.Publish(ctx, kafka.TopicAuthEvents, identity.UserID, eventID, &authpb.AuthEvent{
+		return s.identities.Publish(ctx, kafka.TopicAuthEvents, identity.UserID, eventID, &authpb.AuthEvent{
 			EventId:    eventID,
 			OccurredAt: timestamppb.New(s.now()),
 			Payload: &authpb.AuthEvent_IdentityRegistered{IdentityRegistered: &authpb.IdentityRegistered{
@@ -101,16 +103,16 @@ func (s *AuthServiceImp) Register(ctx context.Context, input domain.RegisterInpu
 }
 
 func (s *AuthServiceImp) VerifyEmail(ctx context.Context, token string) error {
-	return s.identities.Transaction(ctx, func(repo domain.IdentityRepository) error {
+	return s.tx.Transaction(ctx, func(ctx context.Context) error {
 		now := s.now()
-		stored, err := repo.FindToken(ctx, models.PurposeVerifyEmail, hashToken(token))
+		stored, err := s.identities.FindToken(ctx, models.PurposeVerifyEmail, hashToken(token))
 		if err != nil {
 			return err
 		}
 		if !stored.IsUsable(now) {
 			return domain.ErrInvalidToken
 		}
-		identity, err := repo.FindIdentityByID(ctx, stored.IdentityID)
+		identity, err := s.identities.FindIdentityByID(ctx, stored.IdentityID)
 		if errors.Is(err, domain.ErrIdentityNotFound) {
 			return domain.ErrInvalidToken
 		}
@@ -123,14 +125,14 @@ func (s *AuthServiceImp) VerifyEmail(ctx context.Context, token string) error {
 		}
 
 		stored.UsedAt = &now
-		if err := repo.SaveToken(ctx, stored); err != nil {
+		if err := s.identities.SaveToken(ctx, stored); err != nil {
 			return err
 		}
 		if identity.IsVerified() {
 			return nil
 		}
 		identity.EmailVerifiedAt = &now
-		return repo.SaveIdentity(ctx, identity)
+		return s.identities.SaveIdentity(ctx, identity)
 	})
 }
 
@@ -150,11 +152,11 @@ func (s *AuthServiceImp) ResendVerification(ctx context.Context, email string) e
 	if err != nil {
 		return err
 	}
-	err = s.identities.Transaction(ctx, func(repo domain.IdentityRepository) error {
-		if err := repo.RetireTokens(ctx, identity.ID, models.PurposeVerifyEmail, s.now()); err != nil {
+	err = s.tx.Transaction(ctx, func(ctx context.Context) error {
+		if err := s.identities.RetireTokens(ctx, identity.ID, models.PurposeVerifyEmail, s.now()); err != nil {
 			return err
 		}
-		return repo.CreateToken(ctx, s.verificationToken(identity, tokenHash))
+		return s.identities.CreateToken(ctx, s.verificationToken(identity, tokenHash))
 	})
 	if err != nil {
 		return err
@@ -190,11 +192,11 @@ func (s *AuthServiceImp) Login(ctx context.Context, email, password string) (*do
 		ExpiresAt:        s.now().Add(sessionTTL),
 	}
 	var tokens *domain.Tokens
-	err = s.identities.Transaction(ctx, func(repo domain.IdentityRepository) error {
-		if err := repo.CreateSession(ctx, session); err != nil {
+	err = s.tx.Transaction(ctx, func(ctx context.Context) error {
+		if err := s.identities.CreateSession(ctx, session); err != nil {
 			return err
 		}
-		tokens, err = s.issue(ctx, repo, session, refreshToken)
+		tokens, err = s.issue(ctx, session, refreshToken)
 		return err
 	})
 	return tokens, err
@@ -202,8 +204,8 @@ func (s *AuthServiceImp) Login(ctx context.Context, email, password string) (*do
 
 func (s *AuthServiceImp) Refresh(ctx context.Context, refreshToken string) (*domain.Tokens, error) {
 	var tokens *domain.Tokens
-	err := s.identities.Transaction(ctx, func(repo domain.IdentityRepository) error {
-		session, err := repo.FindSessionByRefreshToken(ctx, hashToken(refreshToken))
+	err := s.tx.Transaction(ctx, func(ctx context.Context) error {
+		session, err := s.identities.FindSessionByRefreshToken(ctx, hashToken(refreshToken))
 		if err != nil {
 			return err
 		}
@@ -217,18 +219,18 @@ func (s *AuthServiceImp) Refresh(ctx context.Context, refreshToken string) (*dom
 			return err
 		}
 		session.RefreshTokenHash = nextHash
-		if err := repo.SaveSession(ctx, session); err != nil {
+		if err := s.identities.SaveSession(ctx, session); err != nil {
 			return err
 		}
-		tokens, err = s.issue(ctx, repo, session, next)
+		tokens, err = s.issue(ctx, session, next)
 		return err
 	})
 	return tokens, err
 }
 
 func (s *AuthServiceImp) Logout(ctx context.Context, refreshToken string) error {
-	err := s.identities.Transaction(ctx, func(repo domain.IdentityRepository) error {
-		session, err := repo.FindSessionByRefreshToken(ctx, hashToken(refreshToken))
+	err := s.tx.Transaction(ctx, func(ctx context.Context) error {
+		session, err := s.identities.FindSessionByRefreshToken(ctx, hashToken(refreshToken))
 		if err != nil {
 			return err
 		}
@@ -237,7 +239,7 @@ func (s *AuthServiceImp) Logout(ctx context.Context, refreshToken string) error 
 		}
 		now := s.now()
 		session.RevokedAt = &now
-		return repo.SaveSession(ctx, session)
+		return s.identities.SaveSession(ctx, session)
 	})
 	if errors.Is(err, domain.ErrInvalidToken) {
 		return nil
@@ -255,8 +257,8 @@ func (s *AuthServiceImp) PublicKeys() ([]domain.PublicKey, error) {
 
 // issue signs an access token for session with the identity's current roles,
 // so a role change takes effect at the next refresh.
-func (s *AuthServiceImp) issue(ctx context.Context, repo domain.IdentityRepository, session *models.Session, refreshToken string) (*domain.Tokens, error) {
-	identity, err := repo.FindIdentityWithRoles(ctx, session.IdentityID)
+func (s *AuthServiceImp) issue(ctx context.Context, session *models.Session, refreshToken string) (*domain.Tokens, error) {
+	identity, err := s.identities.FindIdentityWithRoles(ctx, session.IdentityID)
 	if errors.Is(err, domain.ErrIdentityNotFound) {
 		return nil, domain.ErrInvalidToken
 	}
@@ -338,50 +340,4 @@ func hashToken(token string) []byte {
 
 func normalizeEmail(email string) string {
 	return strings.ToLower(strings.TrimSpace(email))
-}
-
-func normalize(in domain.RegisterInput) domain.RegisterInput {
-	in.Email = normalizeEmail(in.Email)
-	in.FirstName = strings.TrimSpace(in.FirstName)
-	in.LastName = strings.TrimSpace(in.LastName)
-	if in.Phone != nil {
-		phone := strings.TrimSpace(*in.Phone)
-		in.Phone = &phone
-		if phone == "" {
-			in.Phone = nil
-		}
-	}
-	return in
-}
-
-// e164 matches international phone numbers like +31612345678.
-var e164 = regexp.MustCompile(`^\+[1-9][0-9]{1,14}$`)
-
-// validateRegister uses the same rules as the user-service's User model: the
-// user-service creates the profile from this input, and would skip a profile
-// it considers invalid.
-func validateRegister(in domain.RegisterInput) error {
-	fields := map[string]string{}
-	if addr, err := mail.ParseAddress(in.Email); err != nil || addr.Address != in.Email || len(in.Email) > 255 {
-		fields["email"] = "email must be a valid email address"
-	}
-	switch {
-	case len(in.Password) < 8:
-		fields["password"] = "password must be at least 8 characters"
-	case len(in.Password) > 72: // bcrypt ignores everything after 72 bytes
-		fields["password"] = "password must be at most 72 characters"
-	}
-	if in.FirstName == "" || len(in.FirstName) > 100 {
-		fields["firstName"] = "firstName is required and at most 100 characters"
-	}
-	if in.LastName == "" || len(in.LastName) > 100 {
-		fields["lastName"] = "lastName is required and at most 100 characters"
-	}
-	if in.Phone != nil && !e164.MatchString(*in.Phone) {
-		fields["phone"] = "phone must be a valid E.164 formatted phone number"
-	}
-	if len(fields) > 0 {
-		return &domain.ValidationError{Fields: fields}
-	}
-	return nil
 }

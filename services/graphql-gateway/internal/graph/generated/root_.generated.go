@@ -42,22 +42,75 @@ type ComplexityRoot struct {
 		User                 func(childComplexity int) int
 	}
 
+	Category struct {
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+	}
+
+	CategoryConnection struct {
+		Nodes      func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	Item struct {
+		Category    func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		ImageURL    func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Status      func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+	}
+
+	ItemConnection struct {
+		Nodes      func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	ItemStatus struct {
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+	}
+
+	ItemStatusConnection struct {
+		Nodes      func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
 	Mutation struct {
+		CreateCategory     func(childComplexity int, name string) int
+		CreateItem         func(childComplexity int, input model.ItemInput) int
+		CreateItemStatus   func(childComplexity int, name string) int
 		CreateUser         func(childComplexity int, input model.UserInput) int
+		DeleteCategory     func(childComplexity int, id string) int
+		DeleteItem         func(childComplexity int, id string) int
+		DeleteItemStatus   func(childComplexity int, id string) int
 		DeleteUser         func(childComplexity int, id string) int
 		Login              func(childComplexity int, email string, password string) int
 		Logout             func(childComplexity int) int
 		RefreshToken       func(childComplexity int) int
 		Register           func(childComplexity int, input model.RegisterInput) int
 		ResendVerification func(childComplexity int, email string) int
+		UpdateCategory     func(childComplexity int, id string, name string) int
+		UpdateItem         func(childComplexity int, id string, input model.ItemInput) int
+		UpdateItemStatus   func(childComplexity int, id string, name string) int
 		UpdateUser         func(childComplexity int, id string, input model.UserInput) int
 		VerifyEmail        func(childComplexity int, token string) int
 	}
 
 	Query struct {
-		Me    func(childComplexity int) int
-		User  func(childComplexity int, id string) int
-		Users func(childComplexity int, offset int, limit int, orderBy *model.UserOrder, filter *model.UserFilter) int
+		Categories   func(childComplexity int, offset int, limit int, orderBy *model.NameOrder, filter *model.NameFilter) int
+		Item         func(childComplexity int, id string) int
+		ItemStatuses func(childComplexity int, offset int, limit int, orderBy *model.NameOrder, filter *model.NameFilter) int
+		Items        func(childComplexity int, offset int, limit int, orderBy *model.ItemOrder, filter *model.ItemFilter) int
+		Me           func(childComplexity int) int
+		User         func(childComplexity int, id string) int
+		Users        func(childComplexity int, offset int, limit int, orderBy *model.UserOrder, filter *model.UserFilter) int
 	}
 
 	User struct {
@@ -122,6 +175,177 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.AuthPayload.User(childComplexity), true
 
+	case "Category.createdAt":
+		if e.ComplexityRoot.Category.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Category.CreatedAt(childComplexity), true
+	case "Category.id":
+		if e.ComplexityRoot.Category.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Category.ID(childComplexity), true
+	case "Category.name":
+		if e.ComplexityRoot.Category.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Category.Name(childComplexity), true
+	case "Category.updatedAt":
+		if e.ComplexityRoot.Category.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Category.UpdatedAt(childComplexity), true
+
+	case "CategoryConnection.nodes":
+		if e.ComplexityRoot.CategoryConnection.Nodes == nil {
+			break
+		}
+
+		return e.ComplexityRoot.CategoryConnection.Nodes(childComplexity), true
+	case "CategoryConnection.totalCount":
+		if e.ComplexityRoot.CategoryConnection.TotalCount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.CategoryConnection.TotalCount(childComplexity), true
+
+	case "Item.category":
+		if e.ComplexityRoot.Item.Category == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Item.Category(childComplexity), true
+	case "Item.createdAt":
+		if e.ComplexityRoot.Item.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Item.CreatedAt(childComplexity), true
+	case "Item.description":
+		if e.ComplexityRoot.Item.Description == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Item.Description(childComplexity), true
+	case "Item.id":
+		if e.ComplexityRoot.Item.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Item.ID(childComplexity), true
+	case "Item.imageUrl":
+		if e.ComplexityRoot.Item.ImageURL == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Item.ImageURL(childComplexity), true
+	case "Item.name":
+		if e.ComplexityRoot.Item.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Item.Name(childComplexity), true
+	case "Item.status":
+		if e.ComplexityRoot.Item.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Item.Status(childComplexity), true
+	case "Item.updatedAt":
+		if e.ComplexityRoot.Item.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Item.UpdatedAt(childComplexity), true
+
+	case "ItemConnection.nodes":
+		if e.ComplexityRoot.ItemConnection.Nodes == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ItemConnection.Nodes(childComplexity), true
+	case "ItemConnection.totalCount":
+		if e.ComplexityRoot.ItemConnection.TotalCount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ItemConnection.TotalCount(childComplexity), true
+
+	case "ItemStatus.createdAt":
+		if e.ComplexityRoot.ItemStatus.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ItemStatus.CreatedAt(childComplexity), true
+	case "ItemStatus.id":
+		if e.ComplexityRoot.ItemStatus.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ItemStatus.ID(childComplexity), true
+	case "ItemStatus.name":
+		if e.ComplexityRoot.ItemStatus.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ItemStatus.Name(childComplexity), true
+	case "ItemStatus.updatedAt":
+		if e.ComplexityRoot.ItemStatus.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ItemStatus.UpdatedAt(childComplexity), true
+
+	case "ItemStatusConnection.nodes":
+		if e.ComplexityRoot.ItemStatusConnection.Nodes == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ItemStatusConnection.Nodes(childComplexity), true
+	case "ItemStatusConnection.totalCount":
+		if e.ComplexityRoot.ItemStatusConnection.TotalCount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ItemStatusConnection.TotalCount(childComplexity), true
+
+	case "Mutation.createCategory":
+		if e.ComplexityRoot.Mutation.CreateCategory == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createCategory_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateCategory(childComplexity, args["name"].(string)), true
+	case "Mutation.createItem":
+		if e.ComplexityRoot.Mutation.CreateItem == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createItem_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateItem(childComplexity, args["input"].(model.ItemInput)), true
+	case "Mutation.createItemStatus":
+		if e.ComplexityRoot.Mutation.CreateItemStatus == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createItemStatus_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateItemStatus(childComplexity, args["name"].(string)), true
 	case "Mutation.createUser":
 		if e.ComplexityRoot.Mutation.CreateUser == nil {
 			break
@@ -133,6 +357,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CreateUser(childComplexity, args["input"].(model.UserInput)), true
+	case "Mutation.deleteCategory":
+		if e.ComplexityRoot.Mutation.DeleteCategory == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteCategory_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteCategory(childComplexity, args["id"].(string)), true
+	case "Mutation.deleteItem":
+		if e.ComplexityRoot.Mutation.DeleteItem == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteItem_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteItem(childComplexity, args["id"].(string)), true
+	case "Mutation.deleteItemStatus":
+		if e.ComplexityRoot.Mutation.DeleteItemStatus == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteItemStatus_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteItemStatus(childComplexity, args["id"].(string)), true
 	case "Mutation.deleteUser":
 		if e.ComplexityRoot.Mutation.DeleteUser == nil {
 			break
@@ -189,6 +446,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.ResendVerification(childComplexity, args["email"].(string)), true
+	case "Mutation.updateCategory":
+		if e.ComplexityRoot.Mutation.UpdateCategory == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateCategory_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpdateCategory(childComplexity, args["id"].(string), args["name"].(string)), true
+	case "Mutation.updateItem":
+		if e.ComplexityRoot.Mutation.UpdateItem == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateItem_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpdateItem(childComplexity, args["id"].(string), args["input"].(model.ItemInput)), true
+	case "Mutation.updateItemStatus":
+		if e.ComplexityRoot.Mutation.UpdateItemStatus == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateItemStatus_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpdateItemStatus(childComplexity, args["id"].(string), args["name"].(string)), true
 	case "Mutation.updateUser":
 		if e.ComplexityRoot.Mutation.UpdateUser == nil {
 			break
@@ -212,6 +502,51 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Mutation.VerifyEmail(childComplexity, args["token"].(string)), true
 
+	case "Query.categories":
+		if e.ComplexityRoot.Query.Categories == nil {
+			break
+		}
+
+		args, err := ec.field_Query_categories_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Categories(childComplexity, args["offset"].(int), args["limit"].(int), args["orderBy"].(*model.NameOrder), args["filter"].(*model.NameFilter)), true
+
+	case "Query.item":
+		if e.ComplexityRoot.Query.Item == nil {
+			break
+		}
+
+		args, err := ec.field_Query_item_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Item(childComplexity, args["id"].(string)), true
+	case "Query.itemStatuses":
+		if e.ComplexityRoot.Query.ItemStatuses == nil {
+			break
+		}
+
+		args, err := ec.field_Query_itemStatuses_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.ItemStatuses(childComplexity, args["offset"].(int), args["limit"].(int), args["orderBy"].(*model.NameOrder), args["filter"].(*model.NameFilter)), true
+	case "Query.items":
+		if e.ComplexityRoot.Query.Items == nil {
+			break
+		}
+
+		args, err := ec.field_Query_items_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Items(childComplexity, args["offset"].(int), args["limit"].(int), args["orderBy"].(*model.ItemOrder), args["filter"].(*model.ItemFilter)), true
 	case "Query.me":
 		if e.ComplexityRoot.Query.Me == nil {
 			break
@@ -311,6 +646,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputItemFilter,
+		ec.unmarshalInputItemInput,
+		ec.unmarshalInputItemOrder,
+		ec.unmarshalInputNameFilter,
+		ec.unmarshalInputNameOrder,
 		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputUserFilter,
 		ec.unmarshalInputUserInput,
@@ -437,6 +777,129 @@ extend type Mutation {
   logout: Boolean!
 }
 `, BuiltIn: false},
+	{Name: "../../../schema/item.graphqls", Input: `type Category {
+  id: ID!
+  name: String!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type ItemStatus {
+  id: ID!
+  name: String!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type Item {
+  id: ID!
+  name: String!
+  description: String
+  imageUrl: String
+  category: Category!
+  status: ItemStatus!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type ItemConnection {
+  "Items matching the filter across all pages."
+  totalCount: Int!
+  nodes: [Item!]!
+}
+
+type CategoryConnection {
+  totalCount: Int!
+  nodes: [Category!]!
+}
+
+type ItemStatusConnection {
+  totalCount: Int!
+  nodes: [ItemStatus!]!
+}
+
+enum ItemSortField {
+  NAME
+  CATEGORY
+  STATUS
+  CREATED_AT
+  UPDATED_AT
+}
+
+"Sorting categories or statuses."
+enum NameSortField {
+  NAME
+  CREATED_AT
+  UPDATED_AT
+}
+
+input ItemOrder {
+  field: ItemSortField!
+  direction: SortDirection! = ASC
+}
+
+input NameOrder {
+  field: NameSortField!
+  direction: SortDirection! = ASC
+}
+
+"Text fields match case-insensitive substrings; categoryId and statusId match exactly."
+input ItemFilter {
+  "Matches the name or the description."
+  search: String
+  name: String
+  categoryId: ID
+  statusId: ID
+}
+
+"Filters categories or statuses: case-insensitive substrings."
+input NameFilter {
+  search: String
+  name: String
+}
+
+"""
+An item's editable fields. On update every field is replaced, so leaving
+description or imageUrl out clears it.
+"""
+input ItemInput {
+  name: String!
+  description: String
+  imageUrl: String
+  categoryId: ID!
+  statusId: ID!
+}
+
+extend type Query {
+  "Null when no item has this id."
+  item(id: ID!): Item @hasPermission(permission: "items:read")
+  items(offset: Int! = 0, limit: Int! = 25, orderBy: ItemOrder, filter: ItemFilter): ItemConnection!
+    @hasPermission(permission: "items:read")
+  categories(offset: Int! = 0, limit: Int! = 25, orderBy: NameOrder, filter: NameFilter): CategoryConnection!
+    @hasPermission(permission: "items:read")
+  itemStatuses(offset: Int! = 0, limit: Int! = 25, orderBy: NameOrder, filter: NameFilter): ItemStatusConnection!
+    @hasPermission(permission: "items:read")
+}
+
+extend type Mutation {
+  "BAD_USER_INPUT when the category or status doesn't exist."
+  createItem(input: ItemInput!): Item! @hasPermission(permission: "items:write")
+  updateItem(id: ID!, input: ItemInput!): Item! @hasPermission(permission: "items:write")
+  "Returns the id of the deleted item."
+  deleteItem(id: ID!): ID! @hasPermission(permission: "items:write")
+
+  "CONFLICT when the name is taken (ignoring case)."
+  createCategory(name: String!): Category! @hasPermission(permission: "items:write")
+  updateCategory(id: ID!, name: String!): Category! @hasPermission(permission: "items:write")
+  "FAILED_PRECONDITION while items still have the category. Returns its id."
+  deleteCategory(id: ID!): ID! @hasPermission(permission: "items:write")
+
+  createItemStatus(name: String!): ItemStatus! @hasPermission(permission: "items:write")
+  updateItemStatus(id: ID!, name: String!): ItemStatus! @hasPermission(permission: "items:write")
+  "FAILED_PRECONDITION while items still have the status. Returns its id."
+  deleteItemStatus(id: ID!): ID! @hasPermission(permission: "items:write")
+}
+`, BuiltIn: false},
 	{Name: "../../../schema/schema.graphqls", Input: `# Shared types. Every list follows the same convention:
 #   things(offset, limit, orderBy, filter): ThingConnection!
 # with offset ≥ 0 and limit 1 to 100. Errors carry extensions.code:
@@ -555,6 +1018,86 @@ func (ec *executionContext) childFields_AuthPayload(ctx context.Context, field g
 		return ec.fieldContext_AuthPayload_permissions(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type AuthPayload", field.Name)
+}
+
+func (ec *executionContext) childFields_Category(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_Category_id(ctx, field)
+	case "name":
+		return ec.fieldContext_Category_name(ctx, field)
+	case "createdAt":
+		return ec.fieldContext_Category_createdAt(ctx, field)
+	case "updatedAt":
+		return ec.fieldContext_Category_updatedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Category", field.Name)
+}
+
+func (ec *executionContext) childFields_CategoryConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_CategoryConnection_totalCount(ctx, field)
+	case "nodes":
+		return ec.fieldContext_CategoryConnection_nodes(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CategoryConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_Item(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_Item_id(ctx, field)
+	case "name":
+		return ec.fieldContext_Item_name(ctx, field)
+	case "description":
+		return ec.fieldContext_Item_description(ctx, field)
+	case "imageUrl":
+		return ec.fieldContext_Item_imageUrl(ctx, field)
+	case "category":
+		return ec.fieldContext_Item_category(ctx, field)
+	case "status":
+		return ec.fieldContext_Item_status(ctx, field)
+	case "createdAt":
+		return ec.fieldContext_Item_createdAt(ctx, field)
+	case "updatedAt":
+		return ec.fieldContext_Item_updatedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Item", field.Name)
+}
+
+func (ec *executionContext) childFields_ItemConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_ItemConnection_totalCount(ctx, field)
+	case "nodes":
+		return ec.fieldContext_ItemConnection_nodes(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ItemConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_ItemStatus(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_ItemStatus_id(ctx, field)
+	case "name":
+		return ec.fieldContext_ItemStatus_name(ctx, field)
+	case "createdAt":
+		return ec.fieldContext_ItemStatus_createdAt(ctx, field)
+	case "updatedAt":
+		return ec.fieldContext_ItemStatus_updatedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ItemStatus", field.Name)
+}
+
+func (ec *executionContext) childFields_ItemStatusConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "totalCount":
+		return ec.fieldContext_ItemStatusConnection_totalCount(ctx, field)
+	case "nodes":
+		return ec.fieldContext_ItemStatusConnection_nodes(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ItemStatusConnection", field.Name)
 }
 
 func (ec *executionContext) childFields_User(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {

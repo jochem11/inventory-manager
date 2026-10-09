@@ -5,7 +5,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@geoman-io/leaflet-geoman-free": "^2.20.2",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.16",
-    "@types/leaflet": "^1.9.22"
+    "@types/leaflet": "^1.9.22",
+    "typescript": "^7.0.2"
   }
 }

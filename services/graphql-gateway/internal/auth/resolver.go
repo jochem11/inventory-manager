@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/gqlerr"
 	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/graph/model"
 	authpb "github.com/jochem11/inventory-manager/services/graphql-gateway/pkg/pb/auth"
+	"github.com/jochem11/inventory-manager/shared/errs"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -64,7 +64,7 @@ func (r *Resolver) Login(ctx context.Context, email, password string) (*model.Au
 func (r *Resolver) Refresh(ctx context.Context) (*model.AuthPayload, error) {
 	token := refreshTokenFrom(ctx)
 	if token == "" {
-		return nil, gqlerr.Unauthenticated("not logged in")
+		return nil, errs.New(errs.Unauthenticated, "not logged in")
 	}
 	resp, err := r.client.Refresh(ctx, &authpb.RefreshRequest{RefreshToken: token})
 	if status.Code(err) == codes.Unauthenticated {

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/jochem11/inventory-manager/shared/database"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -43,9 +44,10 @@ type OutboxMessage struct {
 
 func (OutboxMessage) TableName() string { return "outbox" }
 
-// Enqueue adds event to the outbox inside tx, the transaction that makes the
-// change. key is the user id the event is about.
-func Enqueue(ctx context.Context, tx *gorm.DB, topic, key, eventID string, event proto.Message) error {
+// Enqueue adds event to the outbox. Call it inside the transaction that makes
+// the change (database.Transaction), so both commit or neither does. key is
+// the user id the event is about.
+func Enqueue(ctx context.Context, db *gorm.DB, topic, key, eventID string, event proto.Message) error {
 	payload, err := proto.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("marshal event: %w", err)
@@ -54,7 +56,7 @@ func Enqueue(ctx context.Context, tx *gorm.DB, topic, key, eventID string, event
 	otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(headers))
 
 	msg := &OutboxMessage{EventID: eventID, Topic: topic, Key: key, Payload: payload, Headers: headers}
-	if err := tx.WithContext(ctx).Create(msg).Error; err != nil {
+	if err := database.DB(ctx, db).Create(msg).Error; err != nil {
 		return fmt.Errorf("add event to outbox: %w", err)
 	}
 	return nil
@@ -92,7 +94,8 @@ func RunRelay(ctx context.Context, db *gorm.DB, client *kgo.Client) {
 // publishing the same rows.
 func publishBatch(ctx context.Context, db *gorm.DB, client *kgo.Client) (int, error) {
 	var published int
-	err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	err := database.Transaction(ctx, db, func(ctx context.Context) error {
+		tx := database.DB(ctx, db)
 		var msgs []OutboxMessage
 		err := tx.Clauses(clause.Locking{Strength: "UPDATE", Options: "SKIP LOCKED"}).
 			Where("published_at IS NULL").

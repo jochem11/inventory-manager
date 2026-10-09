@@ -11,7 +11,7 @@ import (
 // input, and rules such as unique emails. The implementation lives in the
 // service package.
 //
-// Errors: invalid input is a *ValidationError, a missing user wraps
+// Errors: invalid input is an *errs.ValidationError, a missing user wraps
 // ErrUserNotFound and a duplicate email wraps ErrEmailTaken.
 type UserService interface {
 	Create(ctx context.Context, input types.UserInput) (*models.User, error)

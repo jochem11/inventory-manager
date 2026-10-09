@@ -11,7 +11,7 @@ It has no database and no business logic of its own.
 | | |
 |---|---|
 | **API** | GraphQL on `:4000/graphql`, schema in [schema/](schema) |
-| **Calls** | [auth-service](../auth-service/Readme.md) `:50052`, [user-service](../user-service/Readme.md) `:50051` |
+| **Calls** | [auth-service](../auth-service/Readme.md) `:50052`, [user-service](../user-service/Readme.md) `:50051`, [item-service](../item-service/Readme.md) `:50053` |
 | **Playground** | http://localhost:4000/graphql in a browser |
 
 ![Overview](docs/overview.svg)
@@ -36,6 +36,8 @@ Requests pass three middlewares, in this order:
 | `me` | login | user-service `GetUser` |
 | `user(id)`, `users(offset, limit, orderBy, filter)` | `users:read` | user-service `GetUser`, `ListUsers` |
 | `createUser`, `updateUser`, `deleteUser` | `users:write` | user-service |
+| `item(id)`, `items(…)`, `categories(…)`, `itemStatuses(…)` | `items:read` | item-service |
+| `createItem`, `updateItem`, `deleteItem`, and the same for `Category` and `ItemStatus` | `items:write` | item-service |
 | `register`, `verifyEmail`, `resendVerification` | | auth-service |
 | `login`, `refreshToken`, `logout` | the refresh cookie (for refresh and logout) | auth-service |
 
@@ -97,7 +99,7 @@ The refresh token never appears in a GraphQL response: the gateway keeps it in a
 
 ## Errors
 
-Service errors arrive as gRPC status codes, and [internal/gqlerr](internal/gqlerr) translates them into `extensions.code`:
+All services share one error model, [shared/errs](../../shared/errs): every error has a kind (not found, invalid, …), which becomes a gRPC status code in the service. [internal/gqlerr](internal/gqlerr) reads the kind back and turns it into `extensions.code`:
 
 | Code | From | Meaning |
 |---|---|---|
@@ -116,6 +118,7 @@ Service errors arrive as gRPC status codes, and [internal/gqlerr](internal/gqler
 | `HTTP_ADDR` | `:4000` | |
 | `USER_SERVICE_ADDR` | `localhost:50051` | `host:port`, no scheme |
 | `AUTH_SERVICE_ADDR` | `localhost:50052` | |
+| `ITEM_SERVICE_ADDR` | `localhost:50053` | |
 | `ALLOWED_ORIGINS` | `http://localhost:3000` | Comma-separated origins allowed to call with cookies |
 | `COOKIE_SECURE` | `false` | Set `true` behind HTTPS |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | unset (no tracing) | In the cluster: `http://jaeger:4317` |
@@ -133,15 +136,15 @@ In the playground, put a token in the *Headers* tab: `{"Authorization": "Bearer 
 
 ### Adding a service
 
-Using an `item` service as the example:
+Using a `location` service as the example:
 
-1. **Proto:** add `item/item.proto` to the [Makefile](Makefile), the same way as `user` and `auth`, and run `make proto`.
-2. **Schema:** add `schema/item.graphqls` with `extend type Query` / `extend type Mutation`, and guard each field with `@hasPermission`. Run `make graphql`; it adds `internal/graph/item.resolvers.go` with stubs.
-3. **Resolver:** add `internal/item/` with a `Resolver` around the gRPC client and a `mapper.go`, like `internal/user/`. Lists use `list.ValidatePage`. Return gRPC errors unchanged; `gqlerr` translates them.
-4. **Wire it:** add `ItemResolver` to [internal/graph/resolver.go](internal/graph/resolver.go), make each stub a one-line call into it, and dial the service in [cmd/main.go](cmd/main.go) using an `ITEM_SERVICE_ADDR` variable.
+1. **Proto:** add `location/location.proto` to the [Makefile](Makefile), the same way as `user` and `auth`, and run `make proto`.
+2. **Schema:** add `schema/location.graphqls` with `extend type Query` / `extend type Mutation`, and guard each field with `@hasPermission`. Run `make graphql`; it adds `internal/graph/location.resolvers.go` with stubs.
+3. **Resolver:** add `internal/location/` with a `Resolver` around the gRPC client and a `mapper.go`, like `internal/item/`. Lists use `list.ValidatePage`. Return gRPC errors unchanged; `gqlerr` translates them.
+4. **Wire it:** add `LocationResolver` to [internal/graph/resolver.go](internal/graph/resolver.go), make each stub a one-line call into it, and dial the service in [cmd/main.go](cmd/main.go) using a `LOCATION_SERVICE_ADDR` variable.
 5. **Deploy:**
-   - add `ITEM_SERVICE_ADDR` to the [deployment](../../infra/development/k8s/graphql-gateway-deployment.yaml)
-   - add the service to the gateway's `resource_deps` in the [Tiltfile](../../Tiltfile)
+   - add `LOCATION_SERVICE_ADDR` to the [deployment](../../infra/development/k8s/graphql-gateway-deployment.yaml)
+   - add a `go_service(...)` line for it in the [Tiltfile](../../Tiltfile), and add it to the gateway's `deps` there
 
 ## Project structure
 
@@ -151,6 +154,7 @@ schema/                      GraphQL schema, one .graphqls per service
 internal/
   auth/                      token verification, directives, refresh cookie, auth resolver
   user/                      user resolver (calls the user-service) and mapping
+  item/                      item, category and status resolver (calls the item-service)
   gqlerr/                    error codes, gRPC status → GraphQL error, HTTP 403
   list/                      paging validation, sort direction
   clients/                   gRPC dialing and call logging

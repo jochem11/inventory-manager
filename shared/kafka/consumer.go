@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -32,6 +34,15 @@ func (e permanentError) Unwrap() error { return e.err }
 // can't be decoded. Consume logs it and moves on to the next record.
 func Permanent(err error) error {
 	return permanentError{err}
+}
+
+// Decode unmarshals a record's value into msg. A record that can't be decoded
+// never will be, so the error is Permanent: Consume skips the record.
+func Decode(record *kgo.Record, msg proto.Message) error {
+	if err := proto.Unmarshal(record.Value, msg); err != nil {
+		return Permanent(fmt.Errorf("decode %s: %w", msg.ProtoReflect().Descriptor().FullName(), err))
+	}
+	return nil
 }
 
 // Consume handles records until ctx is done, in order per partition. Offsets

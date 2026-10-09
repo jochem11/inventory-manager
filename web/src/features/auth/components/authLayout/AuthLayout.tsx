@@ -53,11 +53,3 @@ export function AuthCard(props: AuthCardProps) {
   );
 }
 
-/** A message in a card: an error, or good news. */
-export function AuthNotice(props: { tone?: "error" | "success" | "info"; children: JSX.Element }) {
-  return (
-    <div class={`auth-notice auth-notice--${props.tone ?? "info"}`} role={props.tone === "error" ? "alert" : "status"}>
-      {props.children}
-    </div>
-  );
-}

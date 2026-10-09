@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/jochem11/inventory-manager/shared/database"
 	"time"
 
 	"gorm.io/gorm"
@@ -38,7 +39,7 @@ func (t *IdentityToken) IsUsable(now time.Time) bool {
 
 func (t *IdentityToken) BeforeCreate(tx *gorm.DB) error {
 	if t.ID == "" {
-		t.ID = newID()
+		t.ID = database.NewID()
 	}
 	return nil
 }

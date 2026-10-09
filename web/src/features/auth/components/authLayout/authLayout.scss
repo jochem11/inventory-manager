@@ -78,35 +78,6 @@
   }
 }
 
-.auth-notice {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  line-height: 1.5;
-
-  > * {
-    margin: 0;
-  }
-
-  > * + * {
-    margin-top: var(--space-2);
-  }
-
-  &--error {
-    background: var(--error-soft);
-    color: var(--error-text);
-  }
-
-  &--success {
-    background: var(--success-soft);
-    color: var(--success-text);
-  }
-
-  &--info {
-    background: var(--info-soft);
-    color: var(--text);
-  }
-}
 
 .auth-form-row {
   display: grid;

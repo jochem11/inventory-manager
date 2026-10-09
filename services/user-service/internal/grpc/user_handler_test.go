@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/jochem11/inventory-manager/shared/paging"
 	"net"
 	"testing"
 	"time"
@@ -12,6 +13,8 @@ import (
 	"github.com/jochem11/inventory-manager/services/user-service/internal/models"
 	userpb "github.com/jochem11/inventory-manager/services/user-service/pkg/pb/user"
 	"github.com/jochem11/inventory-manager/services/user-service/pkg/types"
+	"github.com/jochem11/inventory-manager/shared/database"
+	"github.com/jochem11/inventory-manager/shared/errs"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -31,13 +34,15 @@ type fakeService struct {
 }
 
 var ada = &models.User{
-	ID:        "3K4C4qfTOu1pNlLy3ZDPhidNLBr",
+	Model: database.Model{
+		ID:        "3K4C4qfTOu1pNlLy3ZDPhidNLBr",
+		CreatedAt: time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 2, 3, 4, 5, 6, 0, time.UTC),
+	},
 	FirstName: "Ada",
 	LastName:  "Lovelace",
 	Email:     "ada@example.com",
 	Phone:     ptr("+31612345678"),
-	CreatedAt: time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC),
-	UpdatedAt: time.Date(2026, 2, 3, 4, 5, 6, 0, time.UTC),
 }
 
 func ptr(s string) *string { return &s }
@@ -192,8 +197,7 @@ func TestListUsersMapsRequest(t *testing.T) {
 				},
 			},
 			want: types.UserListParams{
-				Offset:  20,
-				Limit:   10,
+				Params:  paging.Params{Offset: 20, Limit: 10},
 				OrderBy: types.UserOrder{Field: types.UserSortLastName, Direction: "desc"},
 				Filter:  types.UserFilter{Search: "jan", FirstName: "li", LastName: "jansen", Email: "demo", Phone: "+31"},
 			},
@@ -255,7 +259,7 @@ func TestErrorsBecomeStatusCodes(t *testing.T) {
 }
 
 func TestValidationErrorHasFieldDetails(t *testing.T) {
-	invalid := &domain.ValidationError{Fields: map[string]string{
+	invalid := &errs.ValidationError{Fields: map[string]string{
 		"firstName": "firstName is a required field",
 		"email":     "email must be a valid email address",
 	}}

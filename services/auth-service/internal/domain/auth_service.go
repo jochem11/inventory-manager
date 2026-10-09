@@ -13,11 +13,13 @@ const DefaultRole = auth.RoleUser
 // RegisterInput is what a new user fills in. The profile fields are passed
 // on to the user-service in the IdentityRegistered event.
 type RegisterInput struct {
-	Email     string
-	Password  string
-	FirstName string
-	LastName  string
-	Phone     *string
+	Email string `json:"email" mod:"trim,lcase" validate:"required,email,max=255"`
+	// Password isn't trimmed: spaces are allowed. bcrypt ignores everything
+	// after 72 bytes, hence the maximum.
+	Password  string  `json:"password" validate:"min=8,max=72"`
+	FirstName string  `json:"firstName" mod:"trim" validate:"required,max=100"`
+	LastName  string  `json:"lastName" mod:"trim" validate:"required,max=100"`
+	Phone     *string `json:"phone" mod:"trim" validate:"omitempty,e164"`
 }
 
 // Tokens are what Login and Refresh hand out.
@@ -40,7 +42,7 @@ type PublicKey struct {
 // AuthService holds the login logic. The implementation lives in the service
 // package.
 //
-// Errors: invalid input is a *ValidationError, a registered email wraps
+// Errors: invalid input is an *errs.ValidationError, a registered email wraps
 // ErrEmailTaken, a bad activation link or refresh token is ErrInvalidToken,
 // a wrong email or password is ErrInvalidCredentials and logging in before
 // activating is ErrEmailNotVerified.

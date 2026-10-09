@@ -45,8 +45,7 @@ type UserFilter struct {
 // UserListParams selects one page of users, filtered and sorted. Limit
 // defaults to 10; the web DataTable offers 10, 25 and 50.
 type UserListParams struct {
-	Offset  int        `json:"offset" validate:"min=0"`
-	Limit   int        `json:"limit" mod:"default=10" validate:"min=1,max=100"`
+	paging.Params
 	OrderBy UserOrder  `json:"orderBy"`
 	Filter  UserFilter `json:"filter"`
 }

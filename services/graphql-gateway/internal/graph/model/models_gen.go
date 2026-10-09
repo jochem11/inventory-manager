@@ -10,7 +10,83 @@ import (
 	"time"
 )
 
+type Category struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type CategoryConnection struct {
+	TotalCount int         `json:"totalCount"`
+	Nodes      []*Category `json:"nodes"`
+}
+
+type Item struct {
+	ID          string      `json:"id"`
+	Name        string      `json:"name"`
+	Description *string     `json:"description,omitempty"`
+	ImageURL    *string     `json:"imageUrl,omitempty"`
+	Category    *Category   `json:"category"`
+	Status      *ItemStatus `json:"status"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	UpdatedAt   time.Time   `json:"updatedAt"`
+}
+
+type ItemConnection struct {
+	// Items matching the filter across all pages.
+	TotalCount int     `json:"totalCount"`
+	Nodes      []*Item `json:"nodes"`
+}
+
+// Text fields match case-insensitive substrings; categoryId and statusId match exactly.
+type ItemFilter struct {
+	// Matches the name or the description.
+	Search     *string `json:"search,omitempty"`
+	Name       *string `json:"name,omitempty"`
+	CategoryID *string `json:"categoryId,omitempty"`
+	StatusID   *string `json:"statusId,omitempty"`
+}
+
+// An item's editable fields. On update every field is replaced, so leaving
+// description or imageUrl out clears it.
+type ItemInput struct {
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+	ImageURL    *string `json:"imageUrl,omitempty"`
+	CategoryID  string  `json:"categoryId"`
+	StatusID    string  `json:"statusId"`
+}
+
+type ItemOrder struct {
+	Field     ItemSortField `json:"field"`
+	Direction SortDirection `json:"direction"`
+}
+
+type ItemStatus struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type ItemStatusConnection struct {
+	TotalCount int           `json:"totalCount"`
+	Nodes      []*ItemStatus `json:"nodes"`
+}
+
 type Mutation struct {
+}
+
+// Filters categories or statuses: case-insensitive substrings.
+type NameFilter struct {
+	Search *string `json:"search,omitempty"`
+	Name   *string `json:"name,omitempty"`
+}
+
+type NameOrder struct {
+	Field     NameSortField `json:"field"`
+	Direction SortDirection `json:"direction"`
 }
 
 type Query struct {
@@ -67,6 +143,125 @@ type UserInput struct {
 type UserOrder struct {
 	Field     UserSortField `json:"field"`
 	Direction SortDirection `json:"direction"`
+}
+
+type ItemSortField string
+
+const (
+	ItemSortFieldName      ItemSortField = "NAME"
+	ItemSortFieldCategory  ItemSortField = "CATEGORY"
+	ItemSortFieldStatus    ItemSortField = "STATUS"
+	ItemSortFieldCreatedAt ItemSortField = "CREATED_AT"
+	ItemSortFieldUpdatedAt ItemSortField = "UPDATED_AT"
+)
+
+var AllItemSortField = []ItemSortField{
+	ItemSortFieldName,
+	ItemSortFieldCategory,
+	ItemSortFieldStatus,
+	ItemSortFieldCreatedAt,
+	ItemSortFieldUpdatedAt,
+}
+
+func (e ItemSortField) IsValid() bool {
+	switch e {
+	case ItemSortFieldName, ItemSortFieldCategory, ItemSortFieldStatus, ItemSortFieldCreatedAt, ItemSortFieldUpdatedAt:
+		return true
+	}
+	return false
+}
+
+func (e ItemSortField) String() string {
+	return string(e)
+}
+
+func (e *ItemSortField) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ItemSortField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ItemSortField", str)
+	}
+	return nil
+}
+
+func (e ItemSortField) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ItemSortField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ItemSortField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// Sorting categories or statuses.
+type NameSortField string
+
+const (
+	NameSortFieldName      NameSortField = "NAME"
+	NameSortFieldCreatedAt NameSortField = "CREATED_AT"
+	NameSortFieldUpdatedAt NameSortField = "UPDATED_AT"
+)
+
+var AllNameSortField = []NameSortField{
+	NameSortFieldName,
+	NameSortFieldCreatedAt,
+	NameSortFieldUpdatedAt,
+}
+
+func (e NameSortField) IsValid() bool {
+	switch e {
+	case NameSortFieldName, NameSortFieldCreatedAt, NameSortFieldUpdatedAt:
+		return true
+	}
+	return false
+}
+
+func (e NameSortField) String() string {
+	return string(e)
+}
+
+func (e *NameSortField) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NameSortField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NameSortField", str)
+	}
+	return nil
+}
+
+func (e NameSortField) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *NameSortField) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e NameSortField) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type SortDirection string

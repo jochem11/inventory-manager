@@ -7,8 +7,9 @@ import (
 
 	"github.com/jochem11/inventory-manager/services/user-service/internal/domain"
 	"github.com/jochem11/inventory-manager/services/user-service/internal/models"
-	"github.com/jochem11/inventory-manager/services/user-service/internal/validation"
 	"github.com/jochem11/inventory-manager/services/user-service/pkg/types"
+	"github.com/jochem11/inventory-manager/shared/database"
+	"github.com/jochem11/inventory-manager/shared/validation"
 )
 
 type UserServiceImp struct {
@@ -26,7 +27,7 @@ func (s *UserServiceImp) Create(ctx context.Context, input types.UserInput) (*mo
 // CreateWithID validates id like any other field (a KSUID); an empty id gets
 // a new one.
 func (s *UserServiceImp) CreateWithID(ctx context.Context, id string, input types.UserInput) (*models.User, error) {
-	user := &models.User{ID: id}
+	user := &models.User{Model: database.Model{ID: id}}
 	applyInput(user, input)
 	if err := validation.Clean(ctx, user); err != nil {
 		return nil, err

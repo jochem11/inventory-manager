@@ -21,10 +21,11 @@ The server renders the page shell; data loads in the browser from the [graphql-g
 | Path | Page | Access | Data |
 |---|---|---|---|
 | `/login`, `/register`, `/verify-email` | Sign-in and sign-up | public | auth mutations |
-| `/` | All items: search, filter, sort, add, edit, delete | login | mock data in [api/items.ts](src/api/items.ts) until the item-service is ready |
+| `/` | All items: search, filter by category or status, sort, add, edit, duplicate, delete | `items:read`; changes need `items:write` | `items`, `createItem`, `updateItem`, `deleteItem` |
+| `/categories`, `/statuses` | Categories and statuses: search, sort, add, rename, delete | `items:read`; changes need `items:write` | `categories`, `itemStatuses` and their mutations |
 | `/users` | Users: search, sort, filter, edit, delete | `users:read`; editing needs `users:write` | `users`, `updateUser`, `deleteUser` |
 | `/locations` | Floor plan with locations (Leaflet, GeoJSON) | login | [data/floorPlan.json](src/data/floorPlan.json) |
-| `/categories`, `/reports`, `/settings/*` | Coming soon | login | |
+| `/reports`, `/settings/*` | Coming soon | login | |
 
 ## Authentication
 
@@ -104,7 +105,13 @@ Tables page, sort, filter and search on the server. Every list in the API has th
 - `createDeleteAction({ source, noun, name, remove })` deletes with a confirmation.
 - `createFormDialog().open({ title, schema, fields, onSubmit })` edits in a dialog.
 
-Both refresh the table afterwards. The [users feature](src/features/users) uses all of these.
+Both refresh the table afterwards. The [users](src/features/users) and [items](src/features/items) features use all of these.
+
+## Forms
+
+- **Field rules:** [schemas/fields.ts](src/schemas/fields.ts) holds the rules the services also check: `nameField`, `emailField`, `newPasswordField`, `optionalPhoneField`. Compose schemas from them, so client and server agree.
+- **Server errors:** `fieldErrorMessage(error)` from `api/graphql.ts` turns them into one message, listing every invalid field for `BAD_USER_INPUT`.
+- **Notices:** `<Notice tone="error" | "success" | "info">` shows them, and `<ErrorNotice message={…} />` when the message may be empty.
 
 ## Configuration
 
@@ -138,7 +145,9 @@ src/
   providers/             AuthProvider, ThemeProvider, DialogProvider
   context/               contexts and hooks: useAuth(), useTheme(), …
   pages/                 one component per route
-  features/              larger parts with their own components and hooks: auth/, layout/, users/
+  features/              larger parts with their own components and hooks: auth/, layout/, users/, items/,
+                         namedRecords/ (one page for categories and statuses)
+  schemas/               Zod field rules shared by the forms
   components/            reusable UI: ui/ (DataTable, Button, …), form/, dialogs/
   hooks/                 createServerTable, createDeleteAction, createFormDialog, createForm, …
   constants/             navigation, access (roles/permissions), API URL, theme

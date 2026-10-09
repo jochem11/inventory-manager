@@ -16,7 +16,7 @@ inventory-manager is a web app on top of a set of small services:
 | Accounts: register, email verification, login, sessions that stay logged in | Done |
 | Roles and permissions, checked in the gateway and reflected in the UI | Done |
 | User management: search, sort, filter, edit and delete users | Done |
-| Items: categories, statuses, a searchable items table | In progress: the UI runs on mock data; the [item-service](services/item-service/Readme.md) is being built |
+| Items, categories and statuses: searchable, sortable tables with add, edit and delete | Done |
 | Locations: buildings, floors and rooms on a floor plan | In progress: the floor-plan view exists |
 | Assigning items to people and places, with history | Planned ([roadmap sketch](services/item-service/Readme.md#roadmap)) |
 
@@ -28,10 +28,20 @@ inventory-manager is a web app on top of a set of small services:
 | [graphql-gateway](services/graphql-gateway/Readme.md) | The single API for the app: GraphQL, login and permission checks | `4000` |
 | [auth-service](services/auth-service/Readme.md) | Logins, email verification, sessions, access tokens, roles | `50052` (gRPC) |
 | [user-service](services/user-service/Readme.md) | User profiles | `50051` (gRPC) |
-| [item-service](services/item-service/Readme.md) | Items, categories, statuses; later locations and assignments | `50053` (gRPC, planned) |
+| [item-service](services/item-service/Readme.md) | Items, categories, statuses; later locations and assignments | `50053` (gRPC) |
 
 **Shared building blocks:**
-- [shared/](shared): the Go module every service uses: tracing, database setup, Kafka (outbox, consumer), paging, token claims and the roles catalog.
+- [shared/](shared): the Go module every service uses:
+
+  | Package | What it gives a service |
+  |---|---|
+  | `app` | startup: tracing, database, Kafka outbox and consumers, gRPC server, graceful shutdown |
+  | `database` | connection, transactions in the context, `Model` (KSUID id + timestamps), error translation |
+  | `errs` | the error model: kinds that become gRPC and GraphQL error codes |
+  | `validation` | cleaning and validating input with struct tags |
+  | `kafka` | outbox, consumers, `HandleOnce` for events delivered more than once |
+  | `paging` | page parameters, safe ordering, page + total in one query |
+  | `auth`, `env`, `telemetry` | token claims and the roles catalog, settings, tracing |
 - [proto/](proto): the gRPC contracts and event messages.
 
 ## Tech stack
@@ -84,6 +94,24 @@ Tilt compiles the Go services on your machine, builds the images, deploys everyt
 2. Email delivery isn't wired up yet, so the activation link appears in the auth-service logs in Tilt. Open it to verify your account.
 3. To get the admin role (for user management), add your email to `ADMIN_EMAILS` in `.env` and restart the auth-service from the Tilt dashboard.
 
+## Development
+
+Run `make` at the root for the targets that cover the whole repository:
+
+```sh
+make check       # what every change should pass: go vet, all Go tests, the web type-check
+make test        # the Go tests of every module (MySQL tests read .env and skip without MySQL)
+make proto       # regenerate the gRPC code of every service after changing proto/
+make typecheck   # type-check the web app
+```
+
+Each service has the same targets in its own folder (`make -C services/user-service`), from the shared [make/go-service.mk](make/go-service.mk).
+
+**Adding a Go service**, as the item-service did:
+- **Startup:** `app.Run` in `cmd/main.go`.
+- **Makefile:** sets `SERVICE`, `PORT` and `PROTOS`, then includes `make/go-service.mk`.
+- **Tilt:** one `go_service('item-service', 50053, deps=['kafka-topics'])` line in the Tiltfile, plus `infra/development/k8s/item-service-deployment.yaml`.
+
 ## Repository layout
 
 ```
@@ -92,8 +120,9 @@ services/
   graphql-gateway/       GraphQL API
   auth-service/          logins, sessions, roles
   user-service/          user profiles
-  item-service/          items (in progress)
+  item-service/          items, categories, statuses
 shared/                  Go module shared by the services
+make/                    Makefile targets shared by the Go services
 proto/                   gRPC contracts and event messages
 infra/development/       Dockerfiles and Kubernetes manifests for Tilt
 docs/                    system-wide diagrams

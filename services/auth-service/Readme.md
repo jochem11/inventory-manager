@@ -138,7 +138,7 @@ make         # list all targets
 ## Project structure
 
 ```
-cmd/main.go            startup: tracing, database + seed, signing key, Kafka, gRPC
+cmd/main.go            startup via shared/app, plus the role seed and the signing key
 service/               AuthService: register, verify, login, refresh, logout
 internal/
   domain/              interfaces, errors, token types

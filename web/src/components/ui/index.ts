@@ -6,5 +6,6 @@ export * from "./dropdownMenu";
 export * from "./errorNotice";
 export * from "./geoJsonMap";
 export * from "./icon";
+export * from "./notice";
 export * from "./pageHeader";
 export * from "./searchBox";

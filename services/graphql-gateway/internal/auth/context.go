@@ -6,10 +6,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/gqlerr"
+	"github.com/jochem11/inventory-manager/shared/errs"
 )
 
 type claimsKey struct{}
+
+// errUnauthenticated is what a field that needs a login answers without one:
+// the client should refresh its token and retry.
+var errUnauthenticated = errs.New(errs.Unauthenticated, "not logged in, or the access token expired")
 
 // ClaimsFrom returns the verified access token of the request, if any.
 func ClaimsFrom(ctx context.Context) (*Claims, bool) {
@@ -22,7 +26,7 @@ func ClaimsFrom(ctx context.Context) (*Claims, bool) {
 func Require(ctx context.Context) (*Claims, error) {
 	claims, ok := ClaimsFrom(ctx)
 	if !ok {
-		return nil, gqlerr.Unauthenticated("not logged in, or the access token expired")
+		return nil, errUnauthenticated
 	}
 	return claims, nil
 }
@@ -34,7 +38,7 @@ func RequirePermission(ctx context.Context, permission string) error {
 		return err
 	}
 	if !claims.HasPermission(permission) {
-		return gqlerr.Forbidden("missing permission " + permission)
+		return errs.New(errs.PermissionDenied, "missing permission "+permission)
 	}
 	return nil
 }
@@ -47,7 +51,7 @@ func RequireRole(ctx context.Context, roles ...string) error {
 		return err
 	}
 	if !claims.HasAnyRole(roles...) {
-		return gqlerr.Forbidden("needs role " + strings.Join(roles, " or "))
+		return errs.New(errs.PermissionDenied, "needs role "+strings.Join(roles, " or "))
 	}
 	return nil
 }

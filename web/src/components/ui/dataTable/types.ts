@@ -89,7 +89,7 @@ export type DataTableProps<T> = {
   rows?: T[];
   columns: DataTableColumn<T>[];
   rowKey: (row: T) => string | number;
-  /** Row name for accessible labels, e.g. "Actions for Hammer". */
+  /** Row name for accessible labels, e.g. "Actions for ThinkPad T14". */
   rowLabel?: (row: T) => string;
 
   /**

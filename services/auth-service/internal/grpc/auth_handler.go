@@ -8,6 +8,7 @@ import (
 
 	"github.com/jochem11/inventory-manager/services/auth-service/internal/domain"
 	authpb "github.com/jochem11/inventory-manager/services/auth-service/pkg/pb/auth"
+	"github.com/jochem11/inventory-manager/shared/errs"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -29,21 +30,21 @@ func (h *AuthHandler) Register(ctx context.Context, req *authpb.RegisterRequest)
 		Phone:     req.Phone,
 	})
 	if err != nil {
-		return nil, toStatus(ctx, err)
+		return nil, errs.ToStatus(ctx, err)
 	}
 	return &authpb.RegisterResponse{UserId: userID}, nil
 }
 
 func (h *AuthHandler) VerifyEmail(ctx context.Context, req *authpb.VerifyEmailRequest) (*authpb.VerifyEmailResponse, error) {
 	if err := h.auth.VerifyEmail(ctx, req.GetToken()); err != nil {
-		return nil, toStatus(ctx, err)
+		return nil, errs.ToStatus(ctx, err)
 	}
 	return &authpb.VerifyEmailResponse{}, nil
 }
 
 func (h *AuthHandler) ResendVerification(ctx context.Context, req *authpb.ResendVerificationRequest) (*authpb.ResendVerificationResponse, error) {
 	if err := h.auth.ResendVerification(ctx, req.GetEmail()); err != nil {
-		return nil, toStatus(ctx, err)
+		return nil, errs.ToStatus(ctx, err)
 	}
 	return &authpb.ResendVerificationResponse{}, nil
 }
@@ -51,7 +52,7 @@ func (h *AuthHandler) ResendVerification(ctx context.Context, req *authpb.Resend
 func (h *AuthHandler) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.LoginResponse, error) {
 	tokens, err := h.auth.Login(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
-		return nil, toStatus(ctx, err)
+		return nil, errs.ToStatus(ctx, err)
 	}
 	return &authpb.LoginResponse{Tokens: toProtoTokens(tokens)}, nil
 }
@@ -59,14 +60,14 @@ func (h *AuthHandler) Login(ctx context.Context, req *authpb.LoginRequest) (*aut
 func (h *AuthHandler) Refresh(ctx context.Context, req *authpb.RefreshRequest) (*authpb.RefreshResponse, error) {
 	tokens, err := h.auth.Refresh(ctx, req.GetRefreshToken())
 	if err != nil {
-		return nil, toStatus(ctx, err)
+		return nil, errs.ToStatus(ctx, err)
 	}
 	return &authpb.RefreshResponse{Tokens: toProtoTokens(tokens)}, nil
 }
 
 func (h *AuthHandler) Logout(ctx context.Context, req *authpb.LogoutRequest) (*authpb.LogoutResponse, error) {
 	if err := h.auth.Logout(ctx, req.GetRefreshToken()); err != nil {
-		return nil, toStatus(ctx, err)
+		return nil, errs.ToStatus(ctx, err)
 	}
 	return &authpb.LogoutResponse{}, nil
 }
@@ -74,7 +75,7 @@ func (h *AuthHandler) Logout(ctx context.Context, req *authpb.LogoutRequest) (*a
 func (h *AuthHandler) GetPublicKeys(ctx context.Context, _ *authpb.GetPublicKeysRequest) (*authpb.GetPublicKeysResponse, error) {
 	keys, err := h.auth.PublicKeys()
 	if err != nil {
-		return nil, toStatus(ctx, err)
+		return nil, errs.ToStatus(ctx, err)
 	}
 	resp := &authpb.GetPublicKeysResponse{}
 	for _, k := range keys {

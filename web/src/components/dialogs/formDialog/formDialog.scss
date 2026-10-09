@@ -2,13 +2,4 @@
   &__form {
     min-width: min(28rem, 100%);
   }
-
-  &__error {
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--error);
-    border-radius: var(--radius-md);
-    background: var(--error-soft);
-    color: var(--error-text);
-    font-size: var(--text-sm);
-  }
 }

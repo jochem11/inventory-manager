@@ -2,13 +2,13 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/jochem11/inventory-manager/services/user-service/internal/domain"
 	"github.com/jochem11/inventory-manager/services/user-service/internal/models"
 	userpb "github.com/jochem11/inventory-manager/services/user-service/pkg/pb/user"
 	"github.com/jochem11/inventory-manager/services/user-service/pkg/types"
+	"github.com/jochem11/inventory-manager/shared/database"
 	"github.com/jochem11/inventory-manager/shared/kafka"
 	"github.com/jochem11/inventory-manager/shared/paging"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -24,7 +24,7 @@ func NewUserRepository(db *gorm.DB) domain.UserRepository {
 }
 
 func (r *UserRepositoryImp) Create(ctx context.Context, user *models.User) error {
-	if err := r.db.WithContext(ctx).Create(user).Error; err != nil {
+	if err := database.DB(ctx, r.db).Create(user).Error; err != nil {
 		return fmt.Errorf("create user: %w", translateError(err))
 	}
 	return nil
@@ -32,7 +32,7 @@ func (r *UserRepositoryImp) Create(ctx context.Context, user *models.User) error
 
 func (r *UserRepositoryImp) FindByID(ctx context.Context, id string) (*models.User, error) {
 	var user models.User
-	if err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error; err != nil {
+	if err := database.DB(ctx, r.db).First(&user, "id = ?", id).Error; err != nil {
 		return nil, fmt.Errorf("find user by id %q: %w", id, translateError(err))
 	}
 	return &user, nil
@@ -40,7 +40,7 @@ func (r *UserRepositoryImp) FindByID(ctx context.Context, id string) (*models.Us
 
 func (r *UserRepositoryImp) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	var user models.User
-	if err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error; err != nil {
+	if err := database.DB(ctx, r.db).First(&user, "email = ?", email).Error; err != nil {
 		return nil, fmt.Errorf("find user by email %q: %w", email, translateError(err))
 	}
 	return &user, nil
@@ -51,7 +51,7 @@ func (r *UserRepositoryImp) FindByIDs(ctx context.Context, ids []string) ([]*mod
 	if len(ids) == 0 {
 		return users, nil
 	}
-	if err := r.db.WithContext(ctx).Where("id IN ?", ids).Order("id").Find(&users).Error; err != nil {
+	if err := database.DB(ctx, r.db).Where("id IN ?", ids).Order("id").Find(&users).Error; err != nil {
 		return nil, fmt.Errorf("find users by ids: %w", err)
 	}
 	return users, nil
@@ -62,8 +62,8 @@ func (r *UserRepositoryImp) FindAll(ctx context.Context, params types.UserListPa
 	if err != nil {
 		return nil, fmt.Errorf("find all users: %w", err)
 	}
-	query := r.db.WithContext(ctx).Model(&models.User{}).Scopes(userFilterScope(params.Filter))
-	page, err := paging.Find[models.User](query, order, params.Offset, params.Limit)
+	query := database.DB(ctx, r.db).Model(&models.User{}).Scopes(userFilterScope(params.Filter))
+	page, err := paging.Find[models.User](query, order, params.Params)
 	if err != nil {
 		return nil, fmt.Errorf("find all users: %w", err)
 	}
@@ -107,7 +107,7 @@ func userFilterScope(f types.UserFilter) func(*gorm.DB) *gorm.DB {
 
 // Update writes every field of user except the ID and creation time.
 func (r *UserRepositoryImp) Update(ctx context.Context, user *models.User) error {
-	result := r.db.WithContext(ctx).
+	result := database.DB(ctx, r.db).
 		Model(user).
 		Select("*").
 		Omit("id", "created_at", "deleted_at").
@@ -125,8 +125,8 @@ func (r *UserRepositoryImp) Update(ctx context.Context, user *models.User) error
 // event in the outbox, so the event is published exactly when the delete
 // commits.
 func (r *UserRepositoryImp) Delete(ctx context.Context, id string) error {
-	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		result := tx.Delete(&models.User{}, "id = ?", id)
+	return database.Transaction(ctx, r.db, func(ctx context.Context) error {
+		result := database.DB(ctx, r.db).Delete(&models.User{}, "id = ?", id)
 		if result.Error != nil {
 			return fmt.Errorf("delete user %q: %w", id, result.Error)
 		}
@@ -134,7 +134,7 @@ func (r *UserRepositoryImp) Delete(ctx context.Context, id string) error {
 			return fmt.Errorf("delete user %q: %w", id, domain.ErrUserNotFound)
 		}
 		eventID := kafka.NewEventID()
-		return kafka.Enqueue(ctx, tx, kafka.TopicUserEvents, id, eventID, &userpb.UserEvent{
+		return kafka.Enqueue(ctx, r.db, kafka.TopicUserEvents, id, eventID, &userpb.UserEvent{
 			EventId:    eventID,
 			OccurredAt: timestamppb.Now(),
 			Payload:    &userpb.UserEvent_UserDeleted{UserDeleted: &userpb.UserDeleted{UserId: id}},
@@ -142,15 +142,9 @@ func (r *UserRepositoryImp) Delete(ctx context.Context, id string) error {
 	})
 }
 
-// translateError maps GORM errors to domain errors. The email index is the
-// only unique key besides the (generated) ID, so a duplicate means the email
-// is taken. It relies on gorm.Config.TranslateError.
+// translateError maps GORM errors to the user-service's errors. The email
+// index is the only unique key besides the (generated) ID, so a duplicate
+// means the email is taken.
 func translateError(err error) error {
-	switch {
-	case errors.Is(err, gorm.ErrRecordNotFound):
-		return domain.ErrUserNotFound
-	case errors.Is(err, gorm.ErrDuplicatedKey):
-		return domain.ErrEmailTaken
-	}
-	return err
+	return database.TranslateError(err, domain.ErrUserNotFound, domain.ErrEmailTaken)
 }

@@ -1,4 +1,4 @@
-import { errorMessage, GraphQLRequestError, hasCode } from "~/api/graphql";
+import { fieldErrorMessage } from "~/api/graphql";
 import * as api from "~/api/users";
 import type { User } from "~/api/users";
 import { useAuth } from "~/context";
@@ -30,10 +30,7 @@ export function createUserEditor(users: TableSource<User>) {
         users.mutate(() =>
           api.updateUser(auth.request, user.id, { ...values, email: user.email, avatarUrl: user.avatarUrl ?? undefined }),
         ),
-      formatError: (e) =>
-        hasCode(e, "BAD_USER_INPUT") && e instanceof GraphQLRequestError && e.fields
-          ? Object.values(e.fields).join(". ")
-          : errorMessage(e),
+      formatError: fieldErrorMessage,
     });
 
   return { open };

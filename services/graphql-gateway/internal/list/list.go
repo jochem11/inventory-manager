@@ -3,8 +3,8 @@
 package list
 
 import (
-	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/gqlerr"
 	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/graph/model"
+	"github.com/jochem11/inventory-manager/shared/errs"
 )
 
 const maxLimit = 100
@@ -12,10 +12,10 @@ const maxLimit = 100
 // ValidatePage checks offset ≥ 0 and 1 ≤ limit ≤ 100.
 func ValidatePage(offset, limit int) error {
 	if offset < 0 {
-		return gqlerr.BadUserInput("offset", "offset must be 0 or more")
+		return errs.Field("offset", "offset must be 0 or more")
 	}
 	if limit < 1 || limit > maxLimit {
-		return gqlerr.BadUserInput("limit", "limit must be between 1 and 100")
+		return errs.Field("limit", "limit must be between 1 and 100")
 	}
 	return nil
 }

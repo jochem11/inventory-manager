@@ -22,8 +22,16 @@ export const routes: RouteDefinition[] = [
   },
   {
     // Sections that exist in the navigation but aren't built yet.
-    path: ["/categories", "/reports", "/settings/profile", "/settings/preferences"],
+    path: ["/reports", "/settings/profile", "/settings/preferences"],
     component: lazy(() => import("./pages/ComingSoon")),
+  },
+  {
+    path: "/categories",
+    component: lazy(() => import("./pages/Categories")),
+  },
+  {
+    path: "/statuses",
+    component: lazy(() => import("./pages/ItemStatuses")),
   },
   {
     path: "/locations",

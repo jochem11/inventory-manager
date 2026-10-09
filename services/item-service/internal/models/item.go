@@ -1,15 +1,13 @@
 package models
 
 import (
-	"time"
-
-	"gorm.io/gorm"
+	"github.com/jochem11/inventory-manager/shared/database"
 )
 
 // Item is cleaned up and validated by its tags: `mod` tags normalize input,
 // `validate` tags check it and `json` tags name the fields.
 type Item struct {
-	ID          string  `json:"id" gorm:"type:char(27) character set ascii collate ascii_bin;primaryKey" validate:"omitempty,len=27,alphanum"`
+	database.Model
 	Name        string  `json:"name" gorm:"size:200;not null;index" mod:"trim" validate:"required,max=200"`
 	Description *string `json:"description" gorm:"type:text" mod:"trim" validate:"omitempty,max=2000"`
 	ImageURL    *string `json:"imageUrl" gorm:"size:2048" mod:"trim" validate:"omitempty,http_url,max=2048"`
@@ -22,15 +20,5 @@ type Item struct {
 	StatusID string     `json:"statusId" gorm:"type:char(27) character set ascii collate ascii_bin;not null;index" validate:"required,len=27,alphanum"`
 	Status   ItemStatus `json:"status" gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" mod:"-" validate:"-"`
 
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-}
-
-// BeforeCreate assigns a KSUID, so IDs are time-ordered and known before insert.
-func (i *Item) BeforeCreate(tx *gorm.DB) error {
-	if i.ID == "" {
-		i.ID = newID()
-	}
-	return nil
+	database.SoftDelete
 }

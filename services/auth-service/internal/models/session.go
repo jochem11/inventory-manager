@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/jochem11/inventory-manager/shared/database"
 	"time"
 
 	"gorm.io/gorm"
@@ -36,7 +37,7 @@ func (s *Session) IsActive(now time.Time) bool {
 
 func (s *Session) BeforeCreate(tx *gorm.DB) error {
 	if s.ID == "" {
-		s.ID = newID()
+		s.ID = database.NewID()
 	}
 	return nil
 }

@@ -1,0 +1,220 @@
+syntax = "proto3";
+
+package item;
+
+import "google/protobuf/timestamp.proto";
+
+// The item-service: items, their categories and their statuses.
+//
+// Errors use gRPC status codes: INVALID_ARGUMENT (with google.rpc.BadRequest
+// details listing each invalid field, also for an item whose category or
+// status doesn't exist), NOT_FOUND for an unknown record, ALREADY_EXISTS for
+// a category or status name that's taken (ignoring case), and
+// FAILED_PRECONDITION for deleting a category or status that items still have.
+//
+// Lists take offset, limit (1 to 100, default 10), order_by, sort_direction
+// ("asc" or "desc") and a filter whose text fields match case-insensitive
+// substrings. Ties always break on id.
+
+service ItemService {
+  // GetItem returns the item with its category and status.
+  rpc GetItem(GetItemRequest) returns (GetItemResponse);
+  // ListItems returns one page of items, each with its category and status.
+  rpc ListItems(ListItemsRequest) returns (ListItemsResponse);
+  rpc CreateItem(CreateItemRequest) returns (CreateItemResponse);
+  // UpdateItem replaces all editable fields: an unset description or
+  // image_url is cleared.
+  rpc UpdateItem(UpdateItemRequest) returns (UpdateItemResponse);
+  rpc DeleteItem(DeleteItemRequest) returns (DeleteItemResponse);
+}
+
+service CategoryService {
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+  rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse);
+  rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse);
+  rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse);
+}
+
+service ItemStatusService {
+  rpc ListItemStatuses(ListItemStatusesRequest) returns (ListItemStatusesResponse);
+  rpc CreateItemStatus(CreateItemStatusRequest) returns (CreateItemStatusResponse);
+  rpc UpdateItemStatus(UpdateItemStatusRequest) returns (UpdateItemStatusResponse);
+  rpc DeleteItemStatus(DeleteItemStatusRequest) returns (DeleteItemStatusResponse);
+}
+
+// --- Records ------------------------------------------------------------------
+
+message Category {
+  // KSUID: 27 base62 characters.
+  string id = 1;
+  string name = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message ItemStatus {
+  string id = 1;
+  string name = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message Item {
+  string id = 1;
+  string name = 2;
+  optional string description = 3;
+  optional string image_url = 4;
+  string category_id = 5;
+  string status_id = 6;
+  Category category = 7;
+  ItemStatus status = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+// --- Items --------------------------------------------------------------------
+
+// An item's editable fields, to create one and to replace one on update.
+message ItemInput {
+  string name = 1;
+  optional string description = 2;
+  optional string image_url = 3;
+  string category_id = 4;
+  string status_id = 5;
+}
+
+message ItemFilter {
+  // Matches the name or the description.
+  optional string search = 1;
+  optional string name = 2;
+  // Exact matches.
+  optional string category_id = 3;
+  optional string status_id = 4;
+}
+
+message GetItemRequest {
+  string id = 1;
+}
+
+message GetItemResponse {
+  Item item = 1;
+}
+
+message ListItemsRequest {
+  int32 offset = 1;
+  int32 limit = 2;
+  // name, category_id, status_id, created_at or updated_at.
+  string order_by = 3;
+  string sort_direction = 4;
+  ItemFilter filter = 5;
+}
+
+message ListItemsResponse {
+  repeated Item items = 1;
+  int32 total_count = 2;
+}
+
+message CreateItemRequest {
+  ItemInput item = 1;
+}
+
+message CreateItemResponse {
+  Item item = 1;
+}
+
+message UpdateItemRequest {
+  string id = 1;
+  ItemInput item = 2;
+}
+
+message UpdateItemResponse {
+  Item item = 1;
+}
+
+message DeleteItemRequest {
+  string id = 1;
+}
+
+message DeleteItemResponse {}
+
+// --- Categories and statuses: a name each ---------------------------------------
+
+// Filters categories or statuses.
+message NameFilter {
+  optional string search = 1;
+  optional string name = 2;
+}
+
+message ListCategoriesRequest {
+  int32 offset = 1;
+  int32 limit = 2;
+  // name, created_at or updated_at.
+  string order_by = 3;
+  string sort_direction = 4;
+  NameFilter filter = 5;
+}
+
+message ListCategoriesResponse {
+  repeated Category categories = 1;
+  int32 total_count = 2;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+}
+
+message CreateCategoryResponse {
+  Category category = 1;
+}
+
+message UpdateCategoryRequest {
+  string id = 1;
+  string name = 2;
+}
+
+message UpdateCategoryResponse {
+  Category category = 1;
+}
+
+message DeleteCategoryRequest {
+  string id = 1;
+}
+
+message DeleteCategoryResponse {}
+
+message ListItemStatusesRequest {
+  int32 offset = 1;
+  int32 limit = 2;
+  // name, created_at or updated_at.
+  string order_by = 3;
+  string sort_direction = 4;
+  NameFilter filter = 5;
+}
+
+message ListItemStatusesResponse {
+  repeated ItemStatus statuses = 1;
+  int32 total_count = 2;
+}
+
+message CreateItemStatusRequest {
+  string name = 1;
+}
+
+message CreateItemStatusResponse {
+  ItemStatus status = 1;
+}
+
+message UpdateItemStatusRequest {
+  string id = 1;
+  string name = 2;
+}
+
+message UpdateItemStatusResponse {
+  ItemStatus status = 1;
+}
+
+message DeleteItemStatusRequest {
+  string id = 1;
+}
+
+message DeleteItemStatusResponse {}

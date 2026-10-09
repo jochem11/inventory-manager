@@ -21,6 +21,11 @@ spec:
           ports:
             - containerPort: 50052
               name: grpc
+          # The settings every service shares (app-config.yaml): ENVIRONMENT,
+          # DB_HOST/DB_PORT, OTEL_EXPORTER_OTLP_ENDPOINT, KAFKA_BROKERS.
+          envFrom:
+            - configMapRef:
+                name: app-config
           env:
             - name: GRPC_ADDR
               value: ":50052"
@@ -38,12 +43,6 @@ spec:
                   name: app-secrets
                   key: JWT_PRIVATE_KEY
                   optional: true
-            # Development uses the MySQL on the host machine; minikube resolves
-            # host.minikube.internal to it.
-            - name: DB_HOST
-              value: "host.minikube.internal"
-            - name: DB_PORT
-              value: "3306"
             - name: DB_NAME
               value: "auth_service"
             # Credentials come from .env, through the Secret app-secrets (see the Tiltfile).
@@ -57,25 +56,9 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: DB_PASSWORD
-            # Accessing an env variable from the app-config config map
-            - name: ENVIRONMENT
-              valueFrom:
-                configMapKeyRef:
-                  key: ENVIRONMENT
-                  name: app-config
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              valueFrom:
-                configMapKeyRef:
-                  key: OTEL_EXPORTER_OTLP_ENDPOINT
-                  name: app-config
             # The page that reads ?token= from the activation link.
             - name: VERIFY_EMAIL_URL
               value: "http://localhost:3000/verify-email"
-            - name: KAFKA_BROKERS
-              valueFrom:
-                configMapKeyRef:
-                  key: KAFKA_BROKERS
-                  name: app-config
           resources:
             requests:
               cpu: "100m"

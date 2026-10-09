@@ -1,0 +1,122 @@
+type Category {
+  id: ID!
+  name: String!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type ItemStatus {
+  id: ID!
+  name: String!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type Item {
+  id: ID!
+  name: String!
+  description: String
+  imageUrl: String
+  category: Category!
+  status: ItemStatus!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type ItemConnection {
+  "Items matching the filter across all pages."
+  totalCount: Int!
+  nodes: [Item!]!
+}
+
+type CategoryConnection {
+  totalCount: Int!
+  nodes: [Category!]!
+}
+
+type ItemStatusConnection {
+  totalCount: Int!
+  nodes: [ItemStatus!]!
+}
+
+enum ItemSortField {
+  NAME
+  CATEGORY
+  STATUS
+  CREATED_AT
+  UPDATED_AT
+}
+
+"Sorting categories or statuses."
+enum NameSortField {
+  NAME
+  CREATED_AT
+  UPDATED_AT
+}
+
+input ItemOrder {
+  field: ItemSortField!
+  direction: SortDirection! = ASC
+}
+
+input NameOrder {
+  field: NameSortField!
+  direction: SortDirection! = ASC
+}
+
+"Text fields match case-insensitive substrings; categoryId and statusId match exactly."
+input ItemFilter {
+  "Matches the name or the description."
+  search: String
+  name: String
+  categoryId: ID
+  statusId: ID
+}
+
+"Filters categories or statuses: case-insensitive substrings."
+input NameFilter {
+  search: String
+  name: String
+}
+
+"""
+An item's editable fields. On update every field is replaced, so leaving
+description or imageUrl out clears it.
+"""
+input ItemInput {
+  name: String!
+  description: String
+  imageUrl: String
+  categoryId: ID!
+  statusId: ID!
+}
+
+extend type Query {
+  "Null when no item has this id."
+  item(id: ID!): Item @hasPermission(permission: "items:read")
+  items(offset: Int! = 0, limit: Int! = 25, orderBy: ItemOrder, filter: ItemFilter): ItemConnection!
+    @hasPermission(permission: "items:read")
+  categories(offset: Int! = 0, limit: Int! = 25, orderBy: NameOrder, filter: NameFilter): CategoryConnection!
+    @hasPermission(permission: "items:read")
+  itemStatuses(offset: Int! = 0, limit: Int! = 25, orderBy: NameOrder, filter: NameFilter): ItemStatusConnection!
+    @hasPermission(permission: "items:read")
+}
+
+extend type Mutation {
+  "BAD_USER_INPUT when the category or status doesn't exist."
+  createItem(input: ItemInput!): Item! @hasPermission(permission: "items:write")
+  updateItem(id: ID!, input: ItemInput!): Item! @hasPermission(permission: "items:write")
+  "Returns the id of the deleted item."
+  deleteItem(id: ID!): ID! @hasPermission(permission: "items:write")
+
+  "CONFLICT when the name is taken (ignoring case)."
+  createCategory(name: String!): Category! @hasPermission(permission: "items:write")
+  updateCategory(id: ID!, name: String!): Category! @hasPermission(permission: "items:write")
+  "FAILED_PRECONDITION while items still have the category. Returns its id."
+  deleteCategory(id: ID!): ID! @hasPermission(permission: "items:write")
+
+  createItemStatus(name: String!): ItemStatus! @hasPermission(permission: "items:write")
+  updateItemStatus(id: ID!, name: String!): ItemStatus! @hasPermission(permission: "items:write")
+  "FAILED_PRECONDITION while items still have the status. Returns its id."
+  deleteItemStatus(id: ID!): ID! @hasPermission(permission: "items:write")
+}

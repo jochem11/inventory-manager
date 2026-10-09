@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/jochem11/inventory-manager/shared/paging"
 	"slices"
 	"strings"
 	"testing"
@@ -101,7 +102,7 @@ func TestFindAllPaging(t *testing.T) {
 
 	var seen []*models.User
 	for offset := 0; offset < len(all); offset += 4 {
-		page, err := repo.FindAll(ctx, types.UserListParams{Offset: offset, Limit: 4})
+		page, err := repo.FindAll(ctx, types.UserListParams{Params: paging.Params{Offset: offset, Limit: 4}})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -118,7 +119,7 @@ func TestFindAllPaging(t *testing.T) {
 		t.Fatalf("pages:\ngot  %v\nwant %v", got, want)
 	}
 
-	page, err := repo.FindAll(ctx, types.UserListParams{Offset: 100, Limit: 10})
+	page, err := repo.FindAll(ctx, types.UserListParams{Params: paging.Params{Offset: 100, Limit: 10}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,8 +138,7 @@ func TestFindAllSorting(t *testing.T) {
 			var got []*models.User
 			for offset := 0; offset < len(all); offset += 2 {
 				page, err := repo.FindAll(ctx, types.UserListParams{
-					Offset:  offset,
-					Limit:   2,
+					Params:  paging.Params{Offset: offset, Limit: 2},
 					OrderBy: types.UserOrder{Field: types.UserSortLastName, Direction: dir},
 				})
 				if err != nil {
@@ -166,7 +166,7 @@ func TestFindAllSorting(t *testing.T) {
 	}
 
 	_, err := repo.FindAll(ctx, types.UserListParams{
-		Limit:   10,
+		Params:  paging.Params{Limit: 10},
 		OrderBy: types.UserOrder{Field: "password; DROP TABLE users", Direction: types.SortAsc},
 	})
 	if err == nil {
@@ -196,7 +196,7 @@ func TestFindAllFiltering(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			page, err := repo.FindAll(context.Background(), types.UserListParams{Limit: 50, Filter: tt.filter})
+			page, err := repo.FindAll(context.Background(), types.UserListParams{Params: paging.Params{Limit: 50}, Filter: tt.filter})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -227,7 +227,7 @@ func TestFindByIDsSkipsUnknown(t *testing.T) {
 func TestErrorsAreDomainErrors(t *testing.T) {
 	repo, all := newTestRepo(t)
 	ctx := context.Background()
-	missing := &models.User{ID: "3K4C4mYaiNGD26bPfleDGK7LsNL", FirstName: "No", LastName: "One", Email: "no.one@example.com"}
+	missing := &models.User{Model: database.Model{ID: "3K4C4mYaiNGD26bPfleDGK7LsNL"}, FirstName: "No", LastName: "One", Email: "no.one@example.com"}
 
 	if _, err := repo.FindByID(ctx, missing.ID); !errors.Is(err, domain.ErrUserNotFound) {
 		t.Errorf("FindByID: %v, want ErrUserNotFound", err)
@@ -292,7 +292,7 @@ func TestDeletedUsersAreHidden(t *testing.T) {
 	if _, err := repo.FindByID(ctx, all[0].ID); !errors.Is(err, domain.ErrUserNotFound) {
 		t.Errorf("FindByID of a deleted user: %v", err)
 	}
-	page, err := repo.FindAll(ctx, types.UserListParams{Limit: 50})
+	page, err := repo.FindAll(ctx, types.UserListParams{Params: paging.Params{Limit: 50}})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -2,25 +2,19 @@ import { A } from "@solidjs/router";
 import { createSignal, Show } from "solid-js";
 import { z } from "zod";
 import { register } from "~/api/auth";
-import { errorMessage, GraphQLRequestError, hasCode } from "~/api/graphql";
+import { fieldErrorMessage, hasCode } from "~/api/graphql";
 import { Form, SubmitButton, TextField } from "~/components/form";
-import { AuthCard, AuthNotice, ResendVerification } from "~/features/auth";
+import { AuthCard, ResendVerification } from "~/features/auth";
+import { Notice } from "~/components/ui";
+import { emailField, nameField, newPasswordField, optionalPhoneField } from "~/schemas/fields";
 
 // The same rules the auth-service checks, so most mistakes show up while typing.
 const schema = z.object({
-  firstName: z.string({ error: "Enter your first name" }).trim().min(1, "Enter your first name").max(100, "At most 100 characters"),
-  lastName: z.string({ error: "Enter your last name" }).trim().min(1, "Enter your last name").max(100, "At most 100 characters"),
-  email: z.string({ error: "Enter your email address" }).trim().pipe(z.email("Enter a valid email address")),
-  password: z
-    .string({ error: "Choose a password" })
-    .min(8, "Use at least 8 characters")
-    .max(72, "Use at most 72 characters"),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^(\+[1-9][0-9]{1,14})?$/, "Use the international format, e.g. +31612345678")
-    .optional()
-    .transform((phone) => phone || undefined),
+  firstName: nameField("Enter your first name"),
+  lastName: nameField("Enter your last name"),
+  email: emailField(),
+  password: newPasswordField(),
+  phone: optionalPhoneField(),
 });
 
 export default function Register() {
@@ -35,10 +29,8 @@ export default function Register() {
     } catch (e) {
       if (hasCode(e, "CONFLICT")) {
         setError("An account with this email already exists");
-      } else if (hasCode(e, "BAD_USER_INPUT") && e instanceof GraphQLRequestError && e.fields) {
-        setError(Object.values(e.fields).join(". "));
       } else {
-        setError(errorMessage(e));
+        setError(fieldErrorMessage(e));
       }
     }
   };
@@ -56,7 +48,7 @@ export default function Register() {
             </>
           }>
           <Form schema={schema} onSubmit={submit}>
-            <Show when={error()}>{(message) => <AuthNotice tone="error">{message()}.</AuthNotice>}</Show>
+            <Show when={error()}>{(message) => <Notice tone="error">{message()}.</Notice>}</Show>
             <div class="auth-form-row">
               <TextField name="firstName" label="First name" autocomplete="given-name" />
               <TextField name="lastName" label="Last name" autocomplete="family-name" />
@@ -87,10 +79,10 @@ export default function Register() {
           title="Check your email"
           description={<>We sent an activation link to {email()}. Open it to activate your account, then log in.</>}
           footer={<A href="/login">Back to log in</A>}>
-          <AuthNotice>
+          <Notice>
             <p>No email after a few minutes? Check your spam folder, or:</p>
             <ResendVerification email={email()} />
-          </AuthNotice>
+          </Notice>
         </AuthCard>
       )}
     </Show>

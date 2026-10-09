@@ -48,6 +48,27 @@ type ItemFilter struct {
 	StatusID   string `json:"statusId"`
 }
 
+type CategorySortField string
+
+const (
+	CategorySortName      CategorySortField = "name"
+	CategorySortCreatedAt CategorySortField = "created_at"
+	CategorySortUpdatedAt CategorySortField = "updated_at"
+)
+
+// CategoryOrder sorts the category list. The zero value means no sort was asked for.
+type CategoryOrder struct {
+	Field     CategorySortField `json:"field" validate:"omitempty,oneof=name created_at updated_at"`
+	Direction SortDirection     `json:"direction" mod:"ucase" validate:"omitempty,oneof=ASC DESC"`
+}
+
+// CategoryListParams selects one page of categories, filtered and sorted.
+type CategoryListParams struct {
+	paging.Params
+	OrderBy CategoryOrder  `json:"orderBy"`
+	Filter  CategoryFilter `json:"filter"`
+}
+
 type CategoryFilter struct {
 	Search string `json:"search" mod:"trim"`
 	Name   string `json:"name" mod:"trim"`
@@ -59,19 +80,30 @@ type ItemStatusFilter struct {
 }
 
 type ItemStatusListParams struct {
-	Offset  int              `json:"offset" validate:"min=0"`
-	Limit   int              `json:"limit" mod:"default=10" validate:"min=1,max=100"`
+	paging.Params
 	OrderBy ItemStatusOrder  `json:"orderBy"`
 	Filter  ItemStatusFilter `json:"filter"`
 }
 
 type ItemListParams struct {
-	Offset  int        `json:"offset" validate:"min=0"`
-	Limit   int        `json:"limit" mod:"default=10" validate:"min=1,max=100"`
+	paging.Params
 	OrderBy ItemOrder  `json:"orderBy"`
 	Filter  ItemFilter `json:"filter"`
 }
 
+// CategoryInput is a category's editable fields, to create or rename one.
+type CategoryInput struct {
+	Name string `json:"name"`
+}
+
+// ItemStatusInput is a status's editable fields, to create or rename one.
+type ItemStatusInput struct {
+	Name string `json:"name"`
+}
+
+// ItemInput is an item's full set of editable fields, used to create an item
+// and to replace one on update. Leaving Description or ImageURL nil or empty
+// means "not set" (and clears it on update).
 type ItemInput struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description"`

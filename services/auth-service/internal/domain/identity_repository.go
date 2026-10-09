@@ -9,12 +9,9 @@ import (
 )
 
 // IdentityRepository persists identities, their email tokens and the events
-// about them. The implementation lives in the repository package.
+// about them. The implementation lives in the repository package. Calls made
+// with the ctx of a database.Transaction run in that transaction.
 type IdentityRepository interface {
-	// Transaction runs fn with a repository whose calls share one database
-	// transaction: all of them are committed, or none if fn returns an error.
-	Transaction(ctx context.Context, fn func(repo IdentityRepository) error) error
-
 	// CreateIdentity returns ErrEmailTaken for an email that is registered.
 	CreateIdentity(ctx context.Context, identity *models.Identity) error
 	FindIdentityByID(ctx context.Context, id string) (*models.Identity, error)

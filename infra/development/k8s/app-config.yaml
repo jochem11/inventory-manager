@@ -8,5 +8,9 @@ data:
   WEB_PORT: "3000"
   # Where the services send traces (OTLP/gRPC). Leave unset to turn tracing off.
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+  # Development uses the MySQL on the host machine; minikube resolves
+  # host.minikube.internal to it. Credentials are in the Secret app-secrets.
+  DB_HOST: "host.minikube.internal"
+  DB_PORT: "3306"
   # Kafka brokers for the services in the cluster.
   KAFKA_BROKERS: "kafka:9092"

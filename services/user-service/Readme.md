@@ -24,7 +24,7 @@ Passwords and logins live in the auth-service, not here. A profile and its login
 | `UpdateUser(id, input)` | Replaces all editable fields; leaving `phone` or `avatar_url` out clears it |
 | `DeleteUser(id)` | Soft-deletes the user and publishes `UserDeleted` |
 
-**Errors** are gRPC status codes:
+**Errors** are gRPC status codes, from the error kinds in [shared/errs](../../shared/errs):
 
 | Code | When |
 |---|---|
@@ -127,15 +127,14 @@ make         # list all targets
 ## Project structure
 
 ```
-cmd/main.go            startup: tracing, database, Kafka, gRPC server
+cmd/main.go            startup via shared/app: database, Kafka outbox + consumer, gRPC server
 service/               UserService: business rules
 internal/
   domain/              interfaces and errors shared by the packages
   grpc/                gRPC handler: proto ⇄ types, errors → status codes
   repository/          GORM queries; Delete also writes the outbox
   events/              Kafka consumer for auth.events
-  models/              GORM models with validation tags
-  validation/          applies the `mod` (clean-up) and `validate` tags
+  models/              GORM models (database.Model + fields) with validation tags
 pkg/types/             request types: list params, filters, input
 pkg/pb/                generated from proto/, don't edit
 docs/                  user-service.drawio and its SVGs

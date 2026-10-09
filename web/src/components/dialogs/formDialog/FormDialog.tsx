@@ -1,8 +1,8 @@
 import "./formDialog.scss";
-import { createSignal, Show, type JSX } from "solid-js";
+import { createSignal, type JSX } from "solid-js";
 import type { z } from "zod";
 import { Form, SubmitButton } from "~/components/form";
-import { Button } from "~/components/ui";
+import { Button, ErrorNotice } from "~/components/ui";
 import { defineDialog } from "~/factories/defineDialog";
 import { createForm } from "~/hooks/createForm";
 import { BaseDialog } from "../baseDialog/BaseDialog";
@@ -57,11 +57,7 @@ export const FormDialog = defineDialog<FormDialogProps, unknown>((props) => {
   return (
     <BaseDialog title={props.title} description={props.description} onClose={() => props.close()}>
       <Form form={form} class="form-dialog__form">
-        <Show when={error()}>
-          <p class="form-dialog__error" role="alert">
-            {error()}
-          </p>
-        </Show>
+        <ErrorNotice message={error()} />
         {props.fields()}
         <div class="base-dialog__actions">
           <Button variant="outline" onClick={() => props.close()}>

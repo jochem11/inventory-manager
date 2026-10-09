@@ -4,10 +4,12 @@ import { z } from "zod";
 import { errorMessage, hasCode } from "~/api/graphql";
 import { Form, SubmitButton, TextField } from "~/components/form";
 import { useAuth } from "~/context";
-import { AuthCard, AuthNotice, ResendVerification, safeRedirect } from "~/features/auth";
+import { AuthCard, ResendVerification, safeRedirect } from "~/features/auth";
+import { Notice } from "~/components/ui";
+import { emailField } from "~/schemas/fields";
 
 const schema = z.object({
-  email: z.string({ error: "Enter your email address" }).trim().pipe(z.email("Enter a valid email address")),
+  email: emailField(),
   password: z.string({ error: "Enter your password" }).min(1, "Enter your password"),
 });
 
@@ -44,13 +46,13 @@ export default function Login() {
         </>
       }>
       <Form schema={schema} onSubmit={submit}>
-        <Show when={error()}>{(message) => <AuthNotice tone="error">{message()}.</AuthNotice>}</Show>
+        <Show when={error()}>{(message) => <Notice tone="error">{message()}.</Notice>}</Show>
         <Show when={unverifiedEmail()}>
           {(email) => (
-            <AuthNotice>
+            <Notice>
               <p>Your email isn't verified yet. Open the activation link we sent to {email()}.</p>
               <ResendVerification email={email()} />
-            </AuthNotice>
+            </Notice>
           )}
         </Show>
         <TextField name="email" type="email" label="Email" autocomplete="email" />

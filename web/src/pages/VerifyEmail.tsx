@@ -4,10 +4,12 @@ import { z } from "zod";
 import { resendVerification, verifyEmail } from "~/api/auth";
 import { errorMessage, hasCode } from "~/api/graphql";
 import { Form, SubmitButton, TextField } from "~/components/form";
-import { AuthCard, AuthNotice } from "~/features/auth";
+import { AuthCard } from "~/features/auth";
+import { Notice } from "~/components/ui";
+import { emailField } from "~/schemas/fields";
 
 const resendSchema = z.object({
-  email: z.string({ error: "Enter your email address" }).trim().pipe(z.email("Enter a valid email address")),
+  email: emailField(),
 });
 
 /** The page the activation link opens: /verify-email?token=… */
@@ -54,7 +56,7 @@ export default function VerifyEmail() {
       </Match>
       <Match when={state() === "error"}>
         <AuthCard title="Couldn't verify your email" footer={<A href="/login">Back to log in</A>}>
-          <AuthNotice tone="error">{error()}.</AuthNotice>
+          <Notice tone="error">{error()}.</Notice>
         </AuthCard>
       </Match>
       <Match when={state() === "invalid"}>
@@ -65,9 +67,9 @@ export default function VerifyEmail() {
           <Switch>
             <Match when={resentTo()}>
               {(email) => (
-                <AuthNotice tone="success">
+                <Notice tone="success">
                   If {email()} has an account that isn't verified yet, a new link is on its way.
-                </AuthNotice>
+                </Notice>
               )}
             </Match>
             <Match when={true}>

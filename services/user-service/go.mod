@@ -3,26 +3,26 @@ module github.com/jochem11/inventory-manager/services/user-service
 go 1.26.2
 
 require (
-	github.com/go-playground/locales v0.14.2
-	github.com/go-playground/mold/v4 v4.5.1
-	github.com/go-playground/universal-translator v0.18.2
-	github.com/go-playground/validator/v10 v10.30.5
-	github.com/segmentio/ksuid v1.0.4
 	github.com/twmb/franz-go v1.22.1
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.71.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc
 	google.golang.org/grpc v1.84.0
 	google.golang.org/protobuf v1.36.12
 	gorm.io/gorm v1.31.2
-	gorm.io/plugin/opentelemetry v0.1.16
 )
 
 require (
+	github.com/go-playground/locales v0.14.2 // indirect
+	github.com/go-playground/mold/v4 v4.5.1 // indirect
+	github.com/go-playground/universal-translator v0.18.2 // indirect
+	github.com/go-playground/validator/v10 v10.30.5 // indirect
+	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/twmb/franz-go/pkg/kmsg v1.14.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.71.0 // indirect
 	go.opentelemetry.io/otel v1.47.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.47.0 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
+	gorm.io/plugin/opentelemetry v0.1.16 // indirect
 )
 
 require (

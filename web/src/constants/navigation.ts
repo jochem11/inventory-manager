@@ -8,8 +8,9 @@ export const NAVIGATION: NavItem[] = [
     label: "Inventory",
     icon: "package",
     children: [
-      { label: "All items", href: "/", end: true },
-      { label: "Categories", href: "/categories" },
+      { label: "All items", href: "/", end: true, access: { permission: PERMISSIONS.itemsRead } },
+      { label: "Categories", href: "/categories", access: { permission: PERMISSIONS.itemsRead } },
+      { label: "Statuses", href: "/statuses", access: { permission: PERMISSIONS.itemsRead } },
       { label: "Locations", href: "/locations" },
     ],
   },

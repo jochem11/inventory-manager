@@ -17,9 +17,11 @@ import (
 	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/clients"
 	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/gqlerr"
 	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/graph"
+	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/item"
 	"github.com/jochem11/inventory-manager/services/graphql-gateway/internal/user"
 	authpb "github.com/jochem11/inventory-manager/services/graphql-gateway/pkg/pb/auth"
 	userpb "github.com/jochem11/inventory-manager/services/graphql-gateway/pkg/pb/user"
+	"github.com/jochem11/inventory-manager/shared/env"
 	"github.com/jochem11/inventory-manager/shared/telemetry"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc"
@@ -45,15 +47,18 @@ func main() {
 	authConn := dial("AUTH_SERVICE_ADDR", "localhost:50052")
 	defer authConn.Close()
 	authClient := authpb.NewAuthServiceClient(authConn)
+	itemConn := dial("ITEM_SERVICE_ADDR", "localhost:50053")
+	defer itemConn.Close()
 
 	resolver := &graph.Resolver{
 		UserResolver: user.NewResolver(userpb.NewUserServiceClient(userConn)),
 		AuthResolver: auth.NewResolver(authClient),
+		ItemResolver: item.NewResolver(itemConn),
 	}
 	// Checks the access token of every request with the auth-service's keys.
-	authenticate := auth.Middleware(auth.NewVerifier(authClient), env("COOKIE_SECURE", "false") == "true")
+	authenticate := auth.Middleware(auth.NewVerifier(authClient), env.Get("COOKIE_SECURE", "false") == "true")
 	// The web app runs on another origin (port) and sends the refresh cookie.
-	allowedOrigins := strings.Split(env("ALLOWED_ORIGINS", "http://localhost:3000"), ",")
+	allowedOrigins := strings.Split(env.Get("ALLOWED_ORIGINS", "http://localhost:3000"), ",")
 
 	mux := http.NewServeMux()
 	// A FORBIDDEN error makes the response a 403.
@@ -66,7 +71,7 @@ func main() {
 	})
 
 	server := &http.Server{
-		Addr:              env("HTTP_ADDR", ":4000"),
+		Addr:              env.Get("HTTP_ADDR", ":4000"),
 		Handler:           traceRequests(cors(allowedOrigins, authenticate(mux))),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
@@ -118,16 +123,9 @@ func cors(allowedOrigins []string, h http.Handler) http.Handler {
 
 // dial connects to the service whose address is in the env var addrKey.
 func dial(addrKey, fallback string) *grpc.ClientConn {
-	conn, err := clients.Dial(env(addrKey, fallback))
+	conn, err := clients.Dial(env.Get(addrKey, fallback))
 	if err != nil {
 		log.Fatalf("create gRPC client for %s: %v", addrKey, err)
 	}
 	return conn
-}
-
-func env(key, fallback string) string {
-	if v, ok := os.LookupEnv(key); ok {
-		return v
-	}
-	return fallback
 }

@@ -15,7 +15,7 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	entranslations "github.com/go-playground/validator/v10/translations/en"
-	"github.com/jochem11/inventory-manager/services/user-service/internal/domain"
+	"github.com/jochem11/inventory-manager/shared/errs"
 )
 
 // Both cache struct metadata, so they are shared rather than created per call.
@@ -50,7 +50,7 @@ func init() {
 
 // Clean normalizes v (a pointer to a struct) by its `mod` tags, turns optional
 // strings that end up empty into nil, then validates it by its `validate`
-// tags. Invalid input is returned as a *domain.ValidationError.
+// tags. Invalid input is returned as an *errs.ValidationError.
 func Clean(ctx context.Context, v any) error {
 	if err := conform.Struct(ctx, v); err != nil {
 		return err
@@ -62,13 +62,41 @@ func Clean(ctx context.Context, v any) error {
 	if !errors.As(err, &fieldErrs) {
 		return err
 	}
+	root := reflect.TypeOf(v).Elem()
 	fields := make(map[string]string, len(fieldErrs))
 	for _, fe := range fieldErrs {
-		// Namespace is "Type.field.sub"; drop the type to key by the JSON path.
-		_, path, _ := strings.Cut(fe.Namespace(), ".")
-		fields[path] = fe.Translate(trans)
+		fields[jsonPath(root, fe)] = fe.Translate(trans)
 	}
-	return &domain.ValidationError{Fields: fields}
+	return &errs.ValidationError{Fields: fields}
+}
+
+// jsonPath is the field's path in JSON names, e.g. "home.city", as clients
+// send it. Embedded structs (like paging.Params) are left out of the path:
+// their fields are promoted, so in JSON they sit on the outer struct.
+func jsonPath(root reflect.Type, fe validator.FieldError) string {
+	// Both namespaces start with the type name: "Type.field.sub".
+	names := strings.Split(fe.Namespace(), ".")[1:]
+	goNames := strings.Split(fe.StructNamespace(), ".")[1:]
+	t := root
+	path := make([]string, 0, len(names))
+	for i, goName := range goNames {
+		for t.Kind() == reflect.Pointer || t.Kind() == reflect.Slice || t.Kind() == reflect.Array || t.Kind() == reflect.Map {
+			t = t.Elem()
+		}
+		field, ok := reflect.StructField{}, false
+		if t.Kind() == reflect.Struct {
+			name, _, _ := strings.Cut(goName, "[") // "Items[0]" → "Items"
+			field, ok = t.FieldByName(name)
+		}
+		if ok {
+			t = field.Type
+			if field.Anonymous {
+				continue
+			}
+		}
+		path = append(path, names[i])
+	}
+	return strings.Join(path, ".")
 }
 
 // nilEmptyStrings sets *string fields that point to "" to nil, so an optional

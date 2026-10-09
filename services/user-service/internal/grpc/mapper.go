@@ -4,6 +4,7 @@ import (
 	"github.com/jochem11/inventory-manager/services/user-service/internal/models"
 	userpb "github.com/jochem11/inventory-manager/services/user-service/pkg/pb/user"
 	"github.com/jochem11/inventory-manager/services/user-service/pkg/types"
+	"github.com/jochem11/inventory-manager/shared/paging"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -46,8 +47,7 @@ func fromProtoInput(in *userpb.UserInput) types.UserInput {
 func fromProtoListRequest(req *userpb.ListUsersRequest) types.UserListParams {
 	f := req.GetFilter()
 	params := types.UserListParams{
-		Offset: int(req.GetOffset()),
-		Limit:  int(req.GetLimit()),
+		Params: paging.Params{Offset: int(req.GetOffset()), Limit: int(req.GetLimit())},
 		Filter: types.UserFilter{
 			Search:    f.GetSearch(),
 			FirstName: f.GetFirstName(),

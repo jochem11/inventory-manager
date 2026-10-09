@@ -97,13 +97,17 @@ k8s_resource('web', port_forwards=3000, labels="frontend")
 # GOARCH is your machine's, which is also minikube's (both arm64 on an M-series Mac).
 GOARCH = str(local('go env GOARCH', quiet=True)).strip()
 
-def go_service(name, ignore=[]):
+def go_service(name, port, deps=[], ignore=[], label=None):
+  """A Go service: compiled on your machine, put in an image, and deployed
+  with infra/development/k8s/<name>-deployment.yaml, port-forwarded to port.
+  It starts after its compile step and the resources in deps; ignore lists
+  files in its folder that don't affect the binary."""
   local_resource(
     name + '-compile',
     'cd services/%s && GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=%s go build -o ../../build/%s ./cmd' % (name, GOARCH, name),
     deps=['./shared', './services/' + name],
     ignore=['services/%s/%s' % (name, path) for path in ['Makefile', 'Readme.md', 'docs'] + ignore] + ['**/*_test.go'],
-    labels=[name],
+    labels=[label or name],
   )
   docker_build(
     'inventory-manager/' + name,
@@ -112,37 +116,17 @@ def go_service(name, ignore=[]):
     only=['./' + name],
     build_args={'BINARY': name},
   )
+  k8s_yaml('./infra/development/k8s/%s-deployment.yaml' % name)
+  k8s_resource(name, port_forwards=port, labels=[label or name], resource_deps=[name + '-compile'] + deps)
 
-### User Service ###
+# The services use the MySQL on your machine and create their databases on
+# first start.
+go_service('user-service', 50051, deps=['kafka-topics'])
+go_service('auth-service', 50052, deps=['kafka-topics'])
+go_service('item-service', 50053)
+# Playground at http://localhost:4000/graphql. Its schema is compiled into the
+# generated code, so the schema files aren't needed in the binary.
+go_service('graphql-gateway', 4000, deps=['user-service', 'auth-service', 'item-service'],
+           ignore=['gqlgen.yml', 'schema'], label='gateway')
 
-go_service('user-service')
-k8s_yaml('./infra/development/k8s/user-service-deployment.yaml')
-# Uses the MySQL running on the host (see user-service-deployment.yaml).
-k8s_resource('user-service', port_forwards=50051, labels='user-service',
-             resource_deps=['user-service-compile', 'kafka-topics'])
-
-### End of User Service ###
-
-
-### Auth Service ###
-
-go_service('auth-service')
-k8s_yaml('./infra/development/k8s/auth-service-deployment.yaml')
-# Uses the MySQL running on the host, like the user-service; creates the
-# auth_service database on first start.
-k8s_resource('auth-service', port_forwards=50052, labels='auth-service',
-             resource_deps=['auth-service-compile', 'kafka-topics'])
-
-### End of Auth Service ###
-
-
-### GraphQL Gateway ###
-
-# The schema is compiled into the generated code, so its files aren't needed.
-go_service('graphql-gateway', ignore=['gqlgen.yml', 'schema'])
-k8s_yaml('./infra/development/k8s/graphql-gateway-deployment.yaml')
-# Playground at http://localhost:4000/graphql.
-k8s_resource('graphql-gateway', port_forwards=4000, labels='gateway',
-             resource_deps=['graphql-gateway-compile', 'user-service', 'auth-service'])
-
-### End of GraphQL Gateway ###
+### End of Go services ###
